@@ -1,0 +1,6 @@
+# Python 3.10+. Apple Silicon: torch from pytorch.org is fine.
+torch>=2.2
+einops
+numpy<2
+soundfile
+torchaudio

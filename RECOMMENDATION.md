@@ -1,6 +1,6 @@
 # Recommendation (2026-09-03)
 
-**Opinion**, with your Gulf export (step 4) and fine-tune scope (step 5) still open. Numbers below are **fact** unless marked otherwise.
+**Opinion**, with the Gulf export (brief item 4) and fine-tune / LiveKit-upgrade scopes (items 5–6) still open. Numbers below are **fact** unless marked otherwise. Coverage of the original brief: [research/00-status.md](research/00-status.md).
 
 ## Ship now
 
@@ -8,8 +8,9 @@
 
 - Unstub the dead Smart Turn server (it has returned `{"eou_probability": 0.5}` since Feb 2026, commit `b860211b` as reported).
 - Keep **Krisp VAD**. These models are pause classifiers; they run *after* silence, they do not replace VAD.
-- CPU is **not** a reason to keep NAMO. Smart Turn p50 ~22 ms vs NAMO ~7 ms; both ≪ 300 ms budget.
+- CPU is **not** a reason to keep NAMO. Smart Turn p50 **22.3 ms** vs NAMO **7.05 ms**; both ≪ 300 ms. Full table: [research/05-cpu-cost.md](research/05-cpu-cost.md).
 - NAMO on eot-bench Arabic **64.6%** false-cutoff @ 300 ms — **worse than a silence timer** (VAD baseline **54.8%**). Smart Turn **39.2%**. We reproduced the published leaderboard exactly.
+- eot-bench operating point used here (Arabic, 300 ms): Smart Turn threshold **0.260**, action_delay **0.200**, timeout **1.000**. (v1-mini: threshold 0.270, same delay/timeout.)
 
 Provider mode (Soniox / Deepgram Flux / Inworld decide EOT) stays out of scope.
 
@@ -39,12 +40,13 @@ Voice Activity Projection (Ekstedt & Skantze, KTH). Stereo: ch0 = user, ch1 = ag
 
 On the 51Talk call: VAP-only does **not** skip isolated «آه»; **VAP + Smart Turn** did. Overlap yield on «لأنه» recovers at 5 s, not at 1 s.
 
-## Still blocked on you
+## Still open (original brief items 4–6, plus EKS)
 
-1. **Step 4:** 300–500 Gulf turn export (the public eot-bench Arabic set is not our traffic).
-2. **Step 5:** Smart Turn fine-tune **scope only** — do not start training until the export exists.
-3. Re-measure VAP CPU on **EKS** before capacity claims (all CPU numbers here are Apple M5, 1 thread).
-4. Duration-heuristic baseline for overlap (“ignore user speech shorter than ~300 ms during TTS”) is **still unmeasured**. VAP has to beat that cheap rule, not beat “do nothing.”
+1. **300–500 Gulf turn export** — public eot-bench Arabic is not our traffic.
+2. **Smart Turn fine-tune scope only** — do not start training until the export exists.
+3. **livekit-agents 1.4.5 → 1.6.x** scoped (fork re-port) — not started.
+4. Re-measure CPU on **EKS** before capacity claims (all numbers here are Apple M5).
+5. Duration-heuristic baseline for overlap (“ignore user speech shorter than ~300 ms during TTS”) is **still unmeasured**. VAP has to beat that cheap rule, not beat “do nothing.”
 
 ## Accuracy snapshot (fact, eot-bench validation, FC@300ms, lower is better)
 

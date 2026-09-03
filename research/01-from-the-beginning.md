@@ -1,6 +1,6 @@
 # From the beginning
 
-How we got here. Dates are 2026. Claims marked **fact** were measured or read from source; **as reported** came from Omar’s handoff and were not re-checked against the cluster in this work; **opinion** is a recommendation.
+How we got here. Dates are 2026. Claims marked **fact** were measured or read from source; **as reported** came from the 2026-09-01 engineering brief and were not re-checked against the cluster in this work; **opinion** is a recommendation.
 
 ## What production does today (as reported, 2026-09-01)
 

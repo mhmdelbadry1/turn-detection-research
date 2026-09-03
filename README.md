@@ -15,6 +15,7 @@ This is the distilled report (tables, decision, clips, VAP runtime). The working
 | [research/05-cpu-cost.md](research/05-cpu-cost.md) | Pause-head p50/p95 and CPU% (Apple M5). |
 | [research/03-architecture-two-heads.md](research/03-architecture-two-heads.md) | Two jobs, two clocks. Why score fusion failed. |
 | [research/04-vap-listen-on-one-call.md](research/04-vap-listen-on-one-call.md) | 51Talk A/B: what each clip folder is. |
+| [research/06-vap-benchmarks.md](research/06-vap-benchmarks.md) | The actual VAP protocol (S/H, S/L, S-pred, BC-pred). Not eot-bench. |
 | [vap-runtime/README.md](vap-runtime/README.md) | How VAP works, defaults, how to run. |
 | [vap-runtime/BEFORE_AFTER.md](vap-runtime/BEFORE_AFTER.md) | Naive rolling window vs streaming CPC. |
 | [recordings/README.md](recordings/README.md) | How to listen. One folder per mix type. |

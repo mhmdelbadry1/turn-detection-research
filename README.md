@@ -4,10 +4,11 @@ A note on **when a voice agent should start speaking**, and **when it should yie
 
 The listen set in `recordings/` is a real telephony call. Keep this repository private.
 
-Start with **[RECOMMENDATION.md](RECOMMENDATION.md)** (one page: model, thresholds, CPU, open questions). Code for the overlap head: **[vap-runtime/](vap-runtime/)**. Clips: **[recordings/](recordings/)**.
+Start with **[RECOMMENDATION.md](RECOMMENDATION.md)** (one page: model, thresholds, CPU, open questions), or **[report.html](report.html)** for the whole package as one readable, navigable page (open it in a browser). Code for the overlap head: **[vap-runtime/](vap-runtime/)**. Clips: **[recordings/](recordings/)**.
 
 | Note | Contents |
 |---|---|
+| [report.html](report.html) | This whole package, merged into one page with a sidebar TOC and two charts. Start here to read/review. |
 | [RECOMMENDATION.md](RECOMMENDATION.md) | Pause head vs overlap head. What the numbers support. |
 | [research/00-scope.md](research/00-scope.md) | Questions asked, what was measured, what is still open. |
 | [research/01-from-the-beginning.md](research/01-from-the-beginning.md) | Production baseline, then the experiments in order. |

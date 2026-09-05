@@ -1,0 +1,1113 @@
+<title>Two Clocks</title>
+<style>
+:root{
+  --bg:#F4F6F5; --surface:#FFFFFF; --surface-2:#FBFCFC;
+  --ink:#12181A; --ink-soft:#4B5A5C; --ink-faint:#7C8B89;
+  --line:#DCE3E1; --line-soft:#E9EEEC;
+  --accent:#0E7C7B; --accent-ink:#0A5958; --accent-bg:#E4F2F1;
+  --amber:#A9701F; --amber-bg:#F6EBDA;
+  --red:#A73E36; --red-bg:#F7E6E3;
+  --gray:#5B6668; --gray-bg:#ECEFEE;
+  --shadow: 0 1px 2px rgba(18,24,26,0.06), 0 8px 24px -12px rgba(18,24,26,0.18);
+  color-scheme: light dark;
+}
+:root:not([data-theme="light"]){
+  @media (prefers-color-scheme: dark){
+    --bg:#0E1413; --surface:#161D1C; --surface-2:#1B2322;
+    --ink:#E8EDEC; --ink-soft:#A9B8B6; --ink-faint:#7C8B89;
+    --line:#283130; --line-soft:#1F2726;
+    --accent:#4FD8D2; --accent-ink:#8DEAE5; --accent-bg:#153331;
+    --amber:#E3AA5F; --amber-bg:#3A2C17;
+    --red:#E58D85; --red-bg:#3A211E;
+    --gray:#9AA6A4; --gray-bg:#212928;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1413; --surface:#161D1C; --surface-2:#1B2322;
+  --ink:#E8EDEC; --ink-soft:#A9B8B6; --ink-faint:#7C8B89;
+  --line:#283130; --line-soft:#1F2726;
+  --accent:#4FD8D2; --accent-ink:#8DEAE5; --accent-bg:#153331;
+  --amber:#E3AA5F; --amber-bg:#3A2C17;
+  --red:#E58D85; --red-bg:#3A211E;
+  --gray:#9AA6A4; --gray-bg:#212928;
+  --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size:16px; line-height:1.6;
+}
+h1,h2,h3,h4{
+  font-family:"Newsreader", Georgia, serif; font-weight:600; color:var(--ink);
+  text-wrap:balance; letter-spacing:-0.01em;
+}
+code, .mono, .tabular, table td.num, table th.num{
+  font-family:"IBM Plex Mono", ui-monospace, "SF Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
+a{color:var(--accent-ink);}
+::selection{background:var(--accent-bg); color:var(--ink);}
+
+/* ---------- layout shell ---------- */
+.shell{ display:grid; grid-template-columns: 272px minmax(0,1fr); max-width:1280px; margin:0 auto; }
+@media (max-width: 920px){ .shell{ grid-template-columns: 1fr; } }
+
+/* ---------- sidebar / toc ---------- */
+.toc-wrap{ border-right:1px solid var(--line); }
+@media (max-width: 920px){ .toc-wrap{ border-right:none; border-bottom:1px solid var(--line); } }
+.toc-sticky{ position:sticky; top:0; max-height:100vh; overflow-y:auto; padding:22px 18px 40px; }
+@media (max-width: 920px){ .toc-sticky{ position:static; max-height:none; padding:16px 18px; } }
+.brand{ display:flex; align-items:baseline; gap:8px; margin-bottom:4px; }
+.brand .mark{ width:10px; height:10px; border-radius:2px; background:var(--accent); flex:none; transform:rotate(45deg); }
+.brand h1{ font-size:20px; margin:0; }
+.brand-sub{ font-size:12.5px; color:var(--ink-faint); margin:2px 0 20px; line-height:1.5; }
+.toc-group{ margin-bottom:18px; }
+.toc-group-label{ font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-faint); font-weight:600; margin:0 0 6px 2px; }
+.toc-group a{
+  display:block; font-size:13.5px; color:var(--ink-soft); text-decoration:none;
+  padding:5px 8px; border-radius:6px; margin:1px 0;
+}
+.toc-group a:hover{ background:var(--surface-2); color:var(--ink); }
+.toc-group a.active{ background:var(--accent-bg); color:var(--accent-ink); font-weight:500; }
+.toc-foot{ margin-top:22px; padding-top:16px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-faint); line-height:1.6; }
+
+/* ---------- main content ---------- */
+main{ min-width:0; padding: 34px 44px 100px; }
+@media (max-width: 700px){ main{ padding: 24px 18px 80px; } }
+.container{ max-width: 760px; }
+.container.wide{ max-width: 920px; }
+
+.masthead{ max-width:820px; margin-bottom:8px; }
+.masthead h1{ font-size:40px; margin:0 0 6px; }
+.masthead .dek{ font-size:17px; color:var(--ink-soft); margin:0 0 18px; max-width:62ch; }
+.status-strip{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:36px; }
+.pill{
+  display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:500;
+  padding:5px 11px; border-radius:999px; border:1px solid var(--line); color:var(--ink-soft);
+  background:var(--surface);
+}
+.pill b{ color:var(--ink); font-weight:600; }
+.pill.warn{ border-color: color-mix(in srgb, var(--amber) 35%, var(--line)); color:var(--amber); background:var(--amber-bg); }
+
+section{ padding-top:56px; scroll-margin-top: 20px; }
+section:first-of-type{ padding-top:0; }
+.section-eyebrow{ font-size:11.5px; text-transform:uppercase; letter-spacing:0.09em; color:var(--accent-ink); font-weight:600; margin:0 0 6px; }
+section h2{ font-size:27px; margin:0 0 6px; }
+section .lede{ font-size:15.5px; color:var(--ink-soft); margin:0 0 22px; max-width:66ch; }
+section h3{ font-size:19px; margin:32px 0 10px; }
+p{ margin:0 0 15px; max-width:70ch; }
+ul, ol{ margin:0 0 16px; padding-left:22px; max-width:68ch; }
+li{ margin-bottom:6px; }
+hr.div{ border:none; border-top:1px solid var(--line); margin:44px 0; }
+
+/* tags = fact / opinion / hypothesis / as-reported / negative */
+.tag{
+  display:inline-flex; align-items:center; font-family:"IBM Plex Sans"; font-size:11px; font-weight:600;
+  letter-spacing:0.03em; text-transform:uppercase; padding:2px 8px; border-radius:5px; vertical-align:1px;
+  margin-right:6px; white-space:nowrap;
+}
+.tag-fact{ background:var(--accent-bg); color:var(--accent-ink); }
+.tag-opinion{ background:var(--amber-bg); color:var(--amber); }
+.tag-hyp{ background:var(--gray-bg); color:var(--gray); }
+.tag-reported{ background:var(--gray-bg); color:var(--gray); }
+.tag-neg{ background:var(--red-bg); color:var(--red); }
+
+.callout{ border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin:18px 0; background:var(--surface); max-width:68ch; }
+.callout p:last-child{ margin-bottom:0; }
+.callout-neg{ background:var(--red-bg); border-color: color-mix(in srgb, var(--red) 30%, var(--line)); }
+.callout-neg strong{ color:var(--red); }
+.callout-warn{ background:var(--amber-bg); border-color: color-mix(in srgb, var(--amber) 30%, var(--line)); }
+
+/* tables */
+.table-scroll{ overflow-x:auto; margin:18px 0 24px; border:1px solid var(--line); border-radius:10px; }
+table{ border-collapse:collapse; width:100%; font-size:13.5px; background:var(--surface); }
+thead th{
+  text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; font-weight:600;
+  color:var(--ink-faint); padding:10px 14px; border-bottom:1px solid var(--line); white-space:nowrap;
+  background:var(--surface-2);
+}
+tbody td{ padding:9px 14px; border-bottom:1px solid var(--line-soft); color:var(--ink-soft); white-space:nowrap; }
+tbody tr:last-child td{ border-bottom:none; }
+td.num, th.num{ text-align:right; }
+td.lead{ color:var(--ink); font-weight:500; }
+tbody tr.highlight td{ background: color-mix(in srgb, var(--accent-bg) 55%, transparent); color:var(--ink); }
+tbody tr.bad td{ color:var(--ink-faint); }
+table small{ color:var(--ink-faint); }
+
+/* code-ish blocks */
+pre{
+  background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:16px 18px;
+  overflow-x:auto; font-size:12.5px; line-height:1.6; margin:16px 0 22px; max-width: 100%;
+}
+pre code{ background:none; padding:0; }
+p code, li code{ background:var(--surface-2); border:1px solid var(--line-soft); border-radius:4px; padding:1px 6px; font-size:0.88em; }
+
+/* charts */
+.chart-card{ border:1px solid var(--line); border-radius:12px; padding:22px 24px 18px; background:var(--surface); margin:20px 0 28px; }
+.chart-title{ font-size:13px; font-weight:600; color:var(--ink); margin:0 0 2px; }
+.chart-note{ font-size:12px; color:var(--ink-faint); margin:0 0 18px; }
+.bar-row{ display:grid; grid-template-columns: 108px 1fr 58px; align-items:center; gap:10px; margin-bottom:9px; }
+.bar-label{ font-size:12.5px; color:var(--ink-soft); text-align:right; }
+.bar-label b{ color:var(--ink); font-weight:600; }
+.bar-track{ height:16px; background:var(--surface-2); border-radius:4px; position:relative; overflow:hidden; }
+.bar-fill{ height:100%; border-radius:4px 2px 2px 4px; }
+.bar-val{ font-family:"IBM Plex Mono"; font-size:12px; color:var(--ink); text-align:left; }
+.chart-group-label{ font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-faint); font-weight:600; margin:16px 0 8px; }
+.chart-group-label:first-child{ margin-top:0; }
+.chart-axis{ display:grid; grid-template-columns: 108px 1fr 58px; margin-top:6px; }
+.chart-axis .ticks{ position:relative; height:14px; font-size:10.5px; color:var(--ink-faint); font-family:"IBM Plex Mono"; }
+.chart-axis .ticks span{ position:absolute; transform:translateX(-50%); }
+
+.legend{ display:flex; gap:16px; flex-wrap:wrap; margin:2px 0 4px; }
+.legend-item{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-soft); }
+.legend-swatch{ width:10px; height:10px; border-radius:2px; }
+
+/* two-column comparison (pause vs overlap) */
+.two-col{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:20px 0 26px; }
+@media (max-width:620px){ .two-col{ grid-template-columns:1fr; } }
+.col-card{ border:1px solid var(--line); border-radius:12px; padding:18px 20px; background:var(--surface); }
+.col-card h4{ margin:0 0 4px; font-size:15px; font-family:"IBM Plex Sans"; font-weight:700; color:var(--accent-ink); }
+.col-card .col-sub{ font-size:12px; color:var(--ink-faint); margin-bottom:12px; }
+.col-card ul{ padding-left:18px; margin-bottom:0; font-size:13.5px; }
+.col-card.overlap h4{ color:var(--amber); }
+
+/* folder / clip maps */
+.filemap{ font-size:13px; }
+.filemap .path{ color:var(--ink); }
+.filemap .desc{ color:var(--ink-faint); }
+
+footer.page-foot{ margin-top:70px; padding-top:24px; border-top:1px solid var(--line); font-size:12px; color:var(--ink-faint); max-width:70ch; }
+footer.page-foot a{ color:var(--ink-faint); }
+
+.backtotop{ display:inline-block; margin-top:28px; font-size:12.5px; color:var(--ink-faint); text-decoration:none; }
+.backtotop:hover{ color:var(--accent-ink); }
+
+@media (prefers-reduced-motion: reduce){ * { scroll-behavior:auto !important; } }
+html{ scroll-behavior:smooth; }
+</style>
+
+<div class="shell">
+  <div class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="brand"><span class="mark"></span><h1>Two Clocks</h1></div>
+      <div class="brand-sub">Turn-detection research for Breez.<br>Pause-EOT vs. overlap — measured, not assumed.</div>
+
+      <nav id="toc">
+        <div class="toc-group">
+          <div class="toc-group-label">Bottom line</div>
+          <a href="#recommendation">Recommendation</a>
+          <a href="#negative-results">Negative results</a>
+          <a href="#two-heads">Two heads, two clocks</a>
+        </div>
+        <div class="toc-group">
+          <div class="toc-group-label">The work</div>
+          <a href="#scope">Scope of the study</a>
+          <a href="#story">From the beginning</a>
+          <a href="#eotbench">eot-bench numbers</a>
+          <a href="#architecture">Architecture detail</a>
+          <a href="#listen">51Talk listen (n=1)</a>
+          <a href="#cpu">CPU cost</a>
+        </div>
+        <div class="toc-group">
+          <div class="toc-group-label">VAP deep-dive</div>
+          <a href="#vap-benchmarks">VAP's own benchmarks</a>
+          <a href="#vap-datasets">Which dataset</a>
+          <a href="#silent-ch1">The silent-ch1 54.8%</a>
+        </div>
+        <div class="toc-group">
+          <div class="toc-group-label">Scoped, not started</div>
+          <a href="#smart-turn-finetune">Smart Turn fine-tune</a>
+          <a href="#livekit-upgrade">LiveKit 1.6.x upgrade</a>
+          <a href="#vap-finetune">VAP fine-tune data</a>
+        </div>
+        <div class="toc-group">
+          <div class="toc-group-label">Reference</div>
+          <a href="#vap-runtime">VAP runtime</a>
+          <a href="#open">Still open</a>
+          <a href="#sources">Sources &amp; provenance</a>
+        </div>
+      </nav>
+
+      <div class="toc-foot">
+        Internal — contains a real customer call excerpt (51Talk). Not for external distribution.
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container wide">
+      <div class="masthead">
+        <h1>Two clocks: pause-EOT and overlap</h1>
+        <p class="dek">A note on when a voice agent should start speaking, and when it should yield. Measurements, listen clips, and a small runtime for the overlap head — not a product ticket.</p>
+      </div>
+      <div class="status-strip">
+        <span class="pill">📅 <b>2026-09-05</b></span>
+        <span class="pill warn">⚠ Interim — Gulf/Levantine eval set still pending</span>
+        <span class="pill">n=1 real call (51Talk)</span>
+        <span class="pill">Machine: Apple M5 — not production EKS</span>
+      </div>
+    </div>
+
+    <div class="container">
+
+    <!-- ================= RECOMMENDATION ================= -->
+    <section id="recommendation">
+      <div class="section-eyebrow">01 — Bottom line</div>
+      <h2>Recommendation</h2>
+      <p class="lede">Opinion where stated; numbers are measured unless marked. Public eot-bench Arabic is not Gulf telephony, so the ranking below is <strong>interim on in-domain traffic</strong>.</p>
+
+      <p>Turn-taking splits into two jobs. <strong>Pause-EOT</strong> — the user went quiet; may the agent start TTS? — is what eot-bench scores. <strong>Overlap</strong> — TTS is already playing; is the user taking the floor, or backchannelling? — is a different clock, and eot-bench cannot score it.</p>
+
+      <p>On pause-EOT, <span class="tag tag-fact">fact</span><strong>Smart Turn v3.2</strong> is the model the measurements support using on the LiveKit SDK already in production (<code>livekit-agents==1.4.5</code>). NAMO is weaker than a silence timer. v1-mini is more accurate, but only becomes available after a 1.6.x upgrade that drops the Breez <code>AudioRecognition</code> fork. Fine-tuning Smart Turn was scoped, not run. VAP is an overlap model, not a pause detector.</p>
+
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Question</th><th>Finding</th><th>Evidence</th></tr></thead>
+          <tbody>
+            <tr><td class="lead">Pause classifier, given 1.4.5</td><td><strong>Smart Turn v3.2</strong> (currently stubbed)</td><td>Arabic FC@300ms <b class="mono">39.2%</b> vs NAMO <b class="mono">64.6%</b></td></tr>
+            <tr><td class="lead">Keep NAMO?</td><td>No, on this harness</td><td>Worse than VAD-only <span class="mono">54.8%</span>. CPU is not the reason to keep it</td></tr>
+            <tr><td class="lead">Keep Krisp VAD?</td><td>Yes</td><td>Pause models fire <em>after</em> VAD silence — they don't replace it</td></tr>
+            <tr><td class="lead">LiveKit v1-mini</td><td>Best pause number; blocked by SDK + fork</td><td>Arabic <span class="mono">24.4%</span>; needs 1.6.x and a stock <code>TurnDetector</code></td></tr>
+            <tr><td class="lead">Fine-tune Smart Turn</td><td>Second step, not the first</td><td>Needs a Gulf train set <em>disjoint</em> from eval. Gain is a hypothesis</td></tr>
+            <tr><td class="lead">VAP</td><td>Overlap head, later</td><td>English checkpoint, n=1 Gulf call. Not a turn detector</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>Operating point on eot-bench Arabic</strong> (300 ms latency budget): Smart Turn threshold <span class="mono">0.260</span>, action_delay <span class="mono">0.200 s</span>, timeout <span class="mono">1.000 s</span>. v1-mini, if used later: threshold <span class="mono">0.270</span>, same delay and timeout.</p>
+
+      <h3>Accuracy — false-cutoff @ 300ms (lower is better)</h3>
+      <p class="lede" style="margin-bottom:8px;">eot-bench validation split. v1-mini and Smart Turn match the published leaderboard exactly. NAMO is measured here — it had no public-harness number before this work.</p>
+
+      <div class="chart-card">
+        <div class="chart-title">False-cutoff rate at a 300&nbsp;ms latency budget</div>
+        <div class="chart-note">Lower bar = fewer wrongly-interrupted users. Same physical bar scale for Arabic and English (0–75%).</div>
+
+        <div class="chart-group-label">Arabic</div>
+        <div class="bar-row"><div class="bar-label"><b>v1-mini</b></div><div class="bar-track"><div class="bar-fill" style="width:32.5%; background:var(--accent);"></div></div><div class="bar-val">24.4%</div></div>
+        <div class="bar-row"><div class="bar-label"><b>Smart Turn</b> v3.2</div><div class="bar-track"><div class="bar-fill" style="width:52.3%; background:var(--accent);"></div></div><div class="bar-val">39.2%</div></div>
+        <div class="bar-row"><div class="bar-label">VAD only / VAP silent-ch1</div><div class="bar-track"><div class="bar-fill" style="width:73.1%; background:var(--gray);"></div></div><div class="bar-val">54.8%</div></div>
+        <div class="bar-row"><div class="bar-label">NAMO <small>(prod today)</small></div><div class="bar-track"><div class="bar-fill" style="width:86.1%; background:var(--red);"></div></div><div class="bar-val">64.6%</div></div>
+
+        <div class="chart-group-label">English</div>
+        <div class="bar-row"><div class="bar-label"><b>v1-mini</b></div><div class="bar-track"><div class="bar-fill" style="width:37.1%; background:var(--accent);"></div></div><div class="bar-val">27.8%</div></div>
+        <div class="bar-row"><div class="bar-label"><b>Smart Turn</b> v3.2</div><div class="bar-track"><div class="bar-fill" style="width:46.9%; background:var(--accent);"></div></div><div class="bar-val">35.2%</div></div>
+        <div class="bar-row"><div class="bar-label">VAD only</div><div class="bar-track"><div class="bar-fill" style="width:74.1%; background:var(--gray);"></div></div><div class="bar-val">55.6%</div></div>
+        <div class="bar-row"><div class="bar-label">NAMO <small>(prod today)</small></div><div class="bar-track"><div class="bar-fill" style="width:93.9%; background:var(--red);"></div></div><div class="bar-val">70.4%</div></div>
+
+        <div class="legend" style="margin-top:14px;">
+          <div class="legend-item"><span class="legend-swatch" style="background:var(--accent);"></span>audio pause classifier</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:var(--gray);"></span>no model (timer)</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:var(--red);"></span>current production (NAMO)</div>
+        </div>
+      </div>
+
+      <p><strong>CPU is not the constraint for pause heads.</strong> Per pause: Smart Turn p50 <span class="mono">22.3 ms</span>, NAMO <span class="mono">7.05 ms</span>, v1-mini <span class="mono">7.85 ms</span>. At ~15 pauses/min that's 1–4% of one core — all well under a 300 ms conversational budget. Machine: Apple M5; these figures do not transfer to Linux production nodes. <a href="#cpu">Full table →</a></p>
+
+      <h3>What follows, if someone acts on this</h3>
+      <ol>
+        <li>Restore Smart Turn on 1.4.5, keep Krisp, use the threshold above. Small change inside the existing fork.</li>
+        <li>Score the same three models on a held-out Gulf/Levantine set. That number should govern, not public Arabic.</li>
+        <li>If the gap to v1-mini still matters after that: either take <code>1.6.10</code> and drop the fork, or retrain Smart Turn on a separate Gulf slice. Both are scoped; neither was started.</li>
+        <li>Treat VAP as overlap, after it beats a duration heuristic — not as the pause head.</li>
+      </ol>
+
+      <div class="callout">
+        <p><strong>Caveats.</strong> (a) Public Arabic eot-bench is not HeyBreez traffic — an in-domain set could reorder the table. (b) Upgrading to 1.6.x without passing a detector silently selects v1-mini, because the default changed. (c) All CPU figures are from a Mac. (d) Fine-tune gain is a hypothesis (0–10&nbsp;pp) with no public precedent.</p>
+      </div>
+    </section>
+
+    <!-- ================= NEGATIVE RESULTS ================= -->
+    <section id="negative-results">
+      <div class="section-eyebrow">01 — Bottom line</div>
+      <h2>Negative results</h2>
+      <p class="lede">What was tried and didn't work — kept because it closes off real-sounding shortcuts.</p>
+
+      <div class="callout callout-neg">
+        <p><span class="tag tag-neg">negative</span><strong>Averaging VAP and Smart Turn into one <code>p_eot</code> made Arabic pause-EOT worse</strong>, under four fusion rules fixed before looking. English was within noise. Two heads, two jobs, two clocks.</p>
+      </div>
+      <div class="callout callout-neg">
+        <p><span class="tag tag-neg">negative</span><strong>VAP with a silent agent channel is not a pause detector.</strong> On eot-bench it lands exactly on the VAD baseline (54.8%): the sweep set threshold&nbsp;=&nbsp;0, so the model is ignored and the harness just waits 300&nbsp;ms. <a href="#silent-ch1">Why →</a></p>
+      </div>
+      <div class="callout callout-neg">
+        <p><span class="tag tag-neg">negative</span><strong>NAMO's CPU advantage is ~15&nbsp;ms per pause.</strong> It is the weakest option measured on this harness — that's not the trade it looks like.</p>
+      </div>
+      <div class="callout callout-neg">
+        <p><span class="tag tag-neg">negative</span><strong>A 1&nbsp;s streaming VAP transformer is the worse overlap window</strong> on the 51Talk clip. KTH's "1&nbsp;s is enough" was silence shift/hold on a Japanese model. Here, 1&nbsp;s muted <span class="mono">0.10 s</span> vs <span class="mono">0.76 s</span> at 5&nbsp;s.</p>
+      </div>
+      <div class="callout callout-neg">
+        <p><span class="tag tag-neg">negative</span><strong>v1-mini outputs cannot be used as training labels</strong> — the LiveKit Model License forbids it.</p>
+      </div>
+      <div class="callout callout-neg">
+        <p><span class="tag tag-neg">negative</span><strong>The 300–500 in-domain turns, if collected, are an eval set.</strong> Training on them would make a fine-tune uninterpretable.</p>
+      </div>
+    </section>
+
+    <!-- ================= TWO HEADS ================= -->
+    <section id="two-heads">
+      <div class="section-eyebrow">01 — Bottom line</div>
+      <h2>Two heads</h2>
+      <p class="lede">Two different questions, on two different clocks. Fusing them into one score hurt the pause job — see negative results above.</p>
+
+      <div class="two-col">
+        <div class="col-card">
+          <h4>Pause head</h4>
+          <div class="col-sub">Fires when: user goes silent</div>
+          <ul>
+            <li>Model: <strong>Smart Turn v3.2</strong> on 1.4.5</li>
+            <li>v1-mini is more accurate <em>if</em> the fork is dropped on 1.6.10</li>
+            <li>Status: stock v3.2 is the supported finding</li>
+          </ul>
+        </div>
+        <div class="col-card overlap">
+          <h4>Overlap head</h4>
+          <div class="col-sub">Fires when: TTS is already playing</div>
+          <ul>
+            <li>Model: <strong>VAP</strong>, English checkpoint, streaming CPC</li>
+            <li><span class="mono">5 s</span> transformer window (default)</li>
+            <li>Status: later — runtime is ready, not shipped</li>
+          </ul>
+        </div>
+      </div>
+
+      <p>VAP should run for the <em>whole call</em>; gate the action, not the forward pass. The CPC encoder is unreliable for the first 1–2&nbsp;s after a cold start, so starting it at TTS onset makes it worst exactly when barge-ins happen. Once VAP says yield inside a TTS island, stay muted until that island ends — on/off muting stutters. Feed VAP the TTS reference <strong>at playout</strong>, not at generation: generation-time audio leading the ear by hundreds of ms looks like overlap to the model.</p>
+
+      <h3>VAP, one paragraph</h3>
+      <p>Voice Activity Projection (Ekstedt &amp; Skantze, KTH). Stereo: ch0&nbsp;=&nbsp;user, ch1&nbsp;=&nbsp;agent. Every 20&nbsp;ms it emits <code>p_now</code> = P(that speaker talks in the next ~0.4&nbsp;s). Yield while TTS plays when <span class="mono">p_user &gt; p_agent</span>. The streaming implementation here persists the CPC encoder (~90% of cost) and re-runs transformers only on the last 5&nbsp;s: <strong>0.187 cores per concurrent call</strong> at 10&nbsp;Hz on an M5 — down from 2.0 naive. Quantization was tried and rejected. On the 51Talk call, VAP alone does not skip an isolated «آه»; VAP plus a pause head does.</p>
+
+      <h3>Two paths past stock Smart Turn <span class="tag tag-hyp">scoped, not started</span></h3>
+      <p><strong>v1-mini on <code>livekit-agents==1.6.10</code>.</strong> Weights ship in the core SDK from 1.6.1. The constraint is the forked <code>AudioRecognition</code>: upstream grew 752&nbsp;→&nbsp;1,960 lines and renamed <code>start</code>/<code>push_audio</code>/<code>update_options</code> to <code>_start</code>/<code>_push_audio</code>/<code>_update_options</code>, so a 1.4.5-style subclass silently no-ops. Dropping the fork is what makes v1-mini real. <a href="#livekit-upgrade">Full scope →</a></p>
+      <p><strong>Retraining Smart Turn.</strong> Upstream <code>train.py</code> is a full retrain from <code>openai/whisper-tiny</code> (4 epochs, batch 384, 270,946 public clips ≈ 2,540 steps) — not a continue-from-v3.2 job. Bound ~3–12 L4-hours (unverified) plus ~2–4 days of slicing and listen-QC. Expected Arabic gain is a hypothesis (0–10&nbsp;pp). <a href="#smart-turn-finetune">Full scope →</a></p>
+      <p><strong>Fine-tuning VAP</strong> (overlap head, not a pause replacement). Freeze CPC; train transformers on per-channel VAD, not complete/incomplete text. Multilingual means mixing the hours in one training run — an English checkpoint does not transfer. <a href="#vap-finetune">Full scope →</a></p>
+    </section>
+
+    <hr class="div" />
+
+    <!-- ================= SCOPE ================= -->
+    <section id="scope">
+      <div class="section-eyebrow">02 — The work</div>
+      <h2>Scope of the study</h2>
+      <p class="lede">Which pause-EOT model, at what threshold, at what CPU cost, with what Arabic quality — and how overlap should be treated separately. Work ran in September 2026. Every number here was measured or read from a cited source; unpublished papers and invented scores are not used.</p>
+
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th class="num">#</th><th>Question</th><th>Status</th><th>Where</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td class="lead">Reproduce public eot-bench (Smart Turn + v1-mini, Arabic + English)</td><td>Done — exact match to published FC@300ms</td><td><a href="#eotbench">eot-bench numbers</a></td></tr>
+            <tr><td class="num">2</td><td class="lead">NAMO on the same harness</td><td>Done — first public-harness number; worse than VAD</td><td>same + <a href="#recommendation">Recommendation</a></td></tr>
+            <tr><td class="num">3</td><td class="lead">Pause-head CPU (p50/p95, CPU% at ~15/min, machine spec)</td><td>Done on Apple M5, not production Linux</td><td><a href="#cpu">CPU cost</a></td></tr>
+            <tr class="bad"><td class="num">4</td><td class="lead">In-domain Arabic set, 300–500 turns, all three models</td><td><strong>Open</strong> — needs a call-recording export</td><td><a href="#listen">n=1 51Talk listen</a></td></tr>
+            <tr><td class="num">5</td><td class="lead">What would a Smart Turn retrain cost?</td><td>Scoped 2026-09-05. <strong>Not trained</strong></td><td><a href="#smart-turn-finetune">Fine-tune scope</a></td></tr>
+            <tr><td class="num">6</td><td class="lead">What breaks on livekit-agents 1.4.5 → 1.6.x?</td><td>Scoped 2026-09-05. Upgrade not started</td><td><a href="#livekit-upgrade">Upgrade scope</a></td></tr>
+            <tr><td class="num">7</td><td class="lead">One-page recommendation</td><td><a href="#recommendation">Recommendation</a> — final on what's measurable; interim on in-domain Arabic</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Work <strong>outside</strong> that list, included because the 51Talk call's problem is overlap, which eot-bench cannot score:</p>
+      <ul>
+        <li>Last-token text gates on lagged STT — <span class="tag tag-neg">negative</span>, same structural issue as NAMO.</li>
+        <li>Score-fusion of VAP + Smart Turn on pause-EOT — <span class="tag tag-neg">negative</span> for Arabic.</li>
+        <li>VAP as overlap head: CPU, quantization (rejected), streaming CPC, 5 s window. <a href="#architecture">Architecture</a></li>
+        <li>What a VAP fine-tune would need (hours of stereo + per-channel VAD, not 300–500 pause clips). <a href="#vap-finetune">Not trained.</a></li>
+      </ul>
+    </section>
+
+    <!-- ================= STORY ================= -->
+    <section id="story">
+      <div class="section-eyebrow">02 — The work</div>
+      <h2>From the beginning</h2>
+      <p class="lede">Dates are 2026. <span class="tag tag-fact">fact</span> = measured or read from source. <span class="tag tag-reported">as reported</span> = production state from an internal 2026-09-01 note, not re-checked against the cluster in this work. <span class="tag tag-opinion">opinion</span> = interpretation.</p>
+
+      <h3>What production does today <span class="tag tag-reported">as reported</span></h3>
+      <p>Turn detection in agent-service is <strong>NAMO alone</strong>, not a NAMO + Smart Turn hybrid. Smart Turn was stubbed in Feb 2026 (<code>b860211b</code>) to save CPU. The inference server hardcodes <code>{"eou_probability": 0.5}</code>. Override logic in agent-service is dead.</p>
+      <p>NAMO v1 Multilingual is <strong>text-only</strong>: it scores the STT transcript, never hears audio. Published standalone accuracy: 84.9% Arabic (weakest of 23 languages except Bengali), 90.9% English. Because it never hears audio, every Arabic STT error becomes a turn-taking error.</p>
+      <p>Krisp VAD stays in any design — min-silence in prod is 0.45&nbsp;s. Pause classifiers fire <em>after</em> VAD reports silence. Provider mode (the STT vendor decides end-of-turn) already works and was out of scope.</p>
+
+      <h3>Why this comparison</h3>
+      <p>Customers barge in, fill, and hold. NAMO cuts them off or waits too long. The audio pause model under consideration was Smart Turn v3.2 (BSD-2, 8&nbsp;MB ONNX, trainable). The accuracy winner in public numbers was LiveKit v1-mini, usable only inside LiveKit Agents 1.6.x (production pin: 1.4.5). Public bench of record: <a href="https://github.com/livekit/eot-bench">eot-bench</a> (LiveKit, Apache-2.0) — false-cutoff rate at a 300&nbsp;ms latency budget. We reproduced it.</p>
+
+      <h3>Experiments, in order</h3>
+      <ol>
+        <li><strong>2026-09-02 — Reproduce eot-bench</strong> (Smart Turn + v1-mini, Arabic + English). Matched the published leaderboard exactly.</li>
+        <li><strong>NAMO on the same harness</strong> (first number). Worse than doing nothing (VAD baseline).</li>
+        <li><strong>Last-token text gates</strong> on lagged STT. Same structural problem as NAMO; didn't beat audio-only.</li>
+        <li><strong>One Breez 51Talk call</strong> with separate human/agent tracks (n=1). Overlap 7.5&nbsp;s. Public eot-bench doesn't score overlap — this call's pain is different.</li>
+        <li><strong>VAP offline</strong> on that stereo pair. First listen mixes sounded like the overlap yield wanted. VAP-only still started TTS after «آه»; adding a pause head skipped it.</li>
+        <li><strong>Score-fusion</strong> of VAP + Smart Turn on eot-bench. Hurt Arabic.</li>
+        <li><strong>CPU of naive VAP.</strong> 1–2 cores per concurrent call. Quantization doesn't fix it — cost is the CPC encoder (~90%), not the transformers.</li>
+        <li><strong>Streaming VAP</strong> (this package's runtime). ~10× cheaper. 1&nbsp;s transformer sounded worse on overlap; 5&nbsp;s recovers it and still holds 10&nbsp;Hz.</li>
+      </ol>
+
+      <h3>What we did not do</h3>
+      <ul>
+        <li>No Smart Turn or VAP training.</li>
+        <li>No 300–500 Gulf export (not available for this work).</li>
+        <li>No EKS CPU re-measure.</li>
+        <li>No duration-heuristic baseline for overlap.</li>
+      </ul>
+
+      <h3>Papers &amp; products <small style="font-weight:400;color:var(--ink-faint);">(pointers, not copies)</small></h3>
+      <ul>
+        <li>eot-bench — <a href="https://github.com/livekit/eot-bench">github.com/livekit/eot-bench</a></li>
+        <li>Smart Turn v3.2 — Pipecat / LiveKit ONNX pause classifier</li>
+        <li>NAMO — <a href="https://huggingface.co/videosdk-live/Namo-Turn-Detector-v1-Multilingual">videosdk-live/Namo-Turn-Detector-v1-Multilingual</a></li>
+        <li>VAP — Ekstedt &amp; Skantze, Interspeech 2022, <a href="https://arxiv.org/abs/2205.09812">arXiv:2205.09812</a> · code: <a href="https://github.com/ErikEkstedt/VoiceActivityProjection">ErikEkstedt/VoiceActivityProjection</a></li>
+        <li>Real-time VAP — Inoue et al., IWSDS 2024, <a href="https://arxiv.org/html/2401.04868v1">arXiv:2401.04868</a></li>
+      </ul>
+    </section>
+
+    <!-- ================= EOT-BENCH ================= -->
+    <section id="eotbench">
+      <div class="section-eyebrow">02 — The work</div>
+      <h2>eot-bench numbers</h2>
+      <p class="lede">Reproduced 2026-09-02. Harness: LiveKit eot-bench, public <code>livekit/eot-bench-data</code> validation. Arabic 381 turns / 8,546 points, English 400 / 11,191. Score point 0.2&nbsp;s. Metric: false-cutoff @ 300&nbsp;ms (lower is better).</p>
+      <p>Smart Turn used the harness default <code>smart-turn-v3.2-gpu.onnx</code> <strong>on CPU</strong> (no CUDA on the research Mac) — the same default as the published leaderboard. v1-mini and Smart Turn match the published leaderboard <strong>exactly</strong> (unrounded).</p>
+
+      <h3>Arabic</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Model</th><th class="num">FC@300ms</th><th class="num">FC@600ms</th><th class="num">Latency @5% cutoff</th><th class="num">Latency @10% cutoff</th></tr></thead>
+          <tbody>
+            <tr class="highlight"><td class="lead">LiveKit v1-mini</td><td class="num mono"><b>24.4%</b></td><td class="num mono"><b>10.3%</b></td><td class="num mono"><b>811 ms</b></td><td class="num mono"><b>610 ms</b></td></tr>
+            <tr><td class="lead">Smart Turn v3.2</td><td class="num mono">39.2%</td><td class="num mono">13.2%</td><td class="num mono">814 ms</td><td class="num mono">636 ms</td></tr>
+            <tr><td class="lead">VAD baseline (silence only)</td><td class="num mono">54.8%</td><td class="num mono">14.8%</td><td class="num mono">900 ms</td><td class="num mono">700 ms</td></tr>
+            <tr><td class="lead">VAP (silent agent channel)</td><td class="num mono">54.8%</td><td class="num mono">—</td><td class="num mono">—</td><td class="num mono">—</td></tr>
+            <tr class="bad"><td class="lead">NAMO multilingual</td><td class="num mono">64.6%</td><td class="num mono">—</td><td class="num mono">—</td><td class="num mono">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;color:var(--ink-faint);">300 ms operating points — v1-mini: threshold 0.270, action_delay 0.200, timeout 1.000. Smart Turn: threshold 0.260, action_delay 0.200, timeout 1.000.</p>
+
+      <h3>English</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Model</th><th class="num">FC@300ms</th><th class="num">FC@600ms</th><th class="num">Latency @5% cutoff</th><th class="num">Latency @10% cutoff</th></tr></thead>
+          <tbody>
+            <tr class="highlight"><td class="lead">LiveKit v1-mini</td><td class="num mono"><b>27.8%</b></td><td class="num mono"><b>12.1%</b></td><td class="num mono">1070 ms</td><td class="num mono"><b>698 ms</b></td></tr>
+            <tr><td class="lead">Smart Turn v3.2</td><td class="num mono">35.2%</td><td class="num mono">14.8%</td><td class="num mono"><b>1051 ms</b></td><td class="num mono">739 ms</td></tr>
+            <tr><td class="lead">VAD baseline</td><td class="num mono">55.6%</td><td class="num mono">21.7%</td><td class="num mono">1600 ms</td><td class="num mono">1000 ms</td></tr>
+            <tr class="bad"><td class="lead">NAMO multilingual</td><td class="num mono">70.4%</td><td class="num mono">—</td><td class="num mono">—</td><td class="num mono">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>How to read this</h3>
+      <ul>
+        <li><strong>v1-mini wins pause-EOT</strong> on this public set. Using it requires LiveKit Agents 1.6.x.</li>
+        <li><strong>Smart Turn is the audio pause head available without a 1.6.x upgrade</strong> — ~15pp worse than v1-mini on Arabic, ~16pp better than VAD, ~25pp better than NAMO.</li>
+        <li><strong>NAMO's 84.9% standalone accuracy is offline, full-transcript.</strong> The 64.6% here is causal with 0.5s transcript lag — the setting that matches streaming STT. The gap is the "NAMO inherits STT lag" claim, quantified.</li>
+        <li><strong>VAP with a silent agent channel is not a pause detector</strong> — 54.8% is the same number as the VAD timer because the sweep set threshold=0. <a href="#silent-ch1">Full explainer →</a></li>
+      </ul>
+
+      <h3>Fusion (2026-09-03)</h3>
+      <p>Smart Turn's <code>p_eot</code> was fused with silent-ch1 VAP's <code>p_eot</code> four ways (mean, max, min, product) — rules fixed before looking.</p>
+      <ul>
+        <li>Arabic: <strong>every rule worse</strong> than Smart Turn's 39.2% (mean 41.6%, max 40.9%, prod 43.1%, min 47.1%). A paired conversation bootstrap found mean/prod/min significantly worse.</li>
+        <li>English: all four within noise of 35.2%. The one apparent win (prod −1.6pp) has a confidence interval that includes zero — and that same rule is significantly worse in Arabic.</li>
+      </ul>
+      <p>Fusing the two scores did not help pause-EOT.</p>
+    </section>
+
+    <!-- ================= ARCHITECTURE ================= -->
+    <section id="architecture">
+      <div class="section-eyebrow">02 — The work</div>
+      <h2>Architecture: two heads, two clocks</h2>
+      <p class="lede">The full detail behind the "two heads" summary — why VAP must run continuously, channel alignment, and the cost shape.</p>
+
+      <h3>The two jobs</h3>
+      <ol>
+        <li><strong>Pause-EOT.</strong> The user went quiet. Is the turn over so we may start TTS? This is what eot-bench scores, and what NAMO / Smart Turn / v1-mini do. They run <em>after VAD silence</em>.</li>
+        <li><strong>Overlap / barge-in.</strong> TTS is already playing. Is the user grabbing the floor, or just «eh» / «آه»? eot-bench cannot score this — no agent channel. This is what VAP is for.</li>
+      </ol>
+      <p>Fusing them into one probability hurts the pause job. Keep two clocks:</p>
+      <pre><code>all call:
+  Krisp VAD on user
+  Smart Turn when VAD says silence  →  may start TTS
+  VAP on stereo (user + TTS-at-playout)  →  scores only; no action yet
+
+while TTS playing:
+  if VAP p_user &gt; p_agent:  yield, sticky until this TTS island ends</code></pre>
+
+      <h3>Why VAP must run even when it must not act</h3>
+      <p>VAP is causal over a rolling stereo context. The CPC encoder is unreliable for the first ~1–2&nbsp;s after a cold start — the research adapter needed 2.1&nbsp;s of left-pad before features were usable. If you start VAP at TTS onset, it is worst exactly when barge-ins are most likely. Consume audio all call; gate the mute, not the forward pass.</p>
+
+      <h3>Channel alignment</h3>
+      <p>VAP assumes ch0 and ch1 are aligned as the <strong>user heard them</strong>. In production, ch1 should be the TTS reference <em>at playout</em>, not at generation — generation can lead the ear by hundreds of ms (network + jitter buffer), which looks like overlap to the model.</p>
+      <p><span class="tag tag-hyp">hypothesis</span>After a yield, Smart Turn's 8&nbsp;s window may contain a period when the agent was audible. Feed the Krisp-cleaned user channel; consider trimming the window to post-yield audio — not measured.</p>
+
+      <h3>Sticky yield</h3>
+      <p>Once a TTS island is interrupted, stay interrupted. On/off muting stutters. The listen mixes use this policy.</p>
+
+      <h3>Cost shape</h3>
+      <p>Smart Turn fires a few times per minute (~22&nbsp;ms each). VAP is a 50&nbsp;Hz encoder for the <em>whole call</em>. Naive implementation: 1–2 CPU cores per concurrent call. Streaming CPC: ~0.19 cores at 5&nbsp;s / 10&nbsp;Hz on an M5. Re-measure on EKS before capacity planning. Quantization is the wrong lever — see <a href="#vap-runtime">VAP runtime</a>.</p>
+
+      <div class="callout callout-warn">
+        <p><strong>What we still have not beaten.</strong> The honest overlap baseline is "ignore user speech shorter than ~300&nbsp;ms while TTS plays." If that catches the same backchannels as VAP, VAP has to earn its 0.19 cores. Unmeasured.</p>
+      </div>
+    </section>
+
+    <!-- ================= LISTEN ================= -->
+    <section id="listen">
+      <div class="section-eyebrow">02 — The work</div>
+      <h2>51Talk listen <span class="pill" style="margin-left:6px;">n=1 — not a benchmark</span></h2>
+      <p class="lede">Session <code>656e9b45-5eeb-4fce-9295-d919fe212464</code>. Overlap on the call: 7.5&nbsp;s. Isolated «آه.» is 0.82&nbsp;s of real audio. We cannot restore TTS that was already cut in the exported agent track — "after" mixes only mute what's still in that file.</p>
+
+      <h3>Clips</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Id</th><th>Seconds</th><th>What to listen for</th></tr></thead>
+          <tbody>
+            <tr><td class="lead mono">01-open-barge</td><td class="mono">13–19</td><td>User talks over the greeting</td></tr>
+            <tr><td class="lead mono">02-eh-backchannel</td><td class="mono">43–73</td><td>Short «eh» while agent talks — should <strong>not</strong> kill TTS</td></tr>
+            <tr><td class="lead mono">03-filler-aah</td><td class="mono">120.5–130</td><td>Isolated «آه» after a pause — pause head should skip new TTS; VAP-only does <strong>not</strong></td></tr>
+            <tr><td class="lead mono">04-liannah</td><td class="mono">154–166</td><td>User talks over TTS («لأنه») — overlap yield</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Folder map</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Folder</th><th>What you hear</th><th>Takeaway</th></tr></thead>
+          <tbody>
+            <tr><td class="lead mono">01-original-mix</td><td>Customer mix, no mute</td><td>Baseline</td></tr>
+            <tr><td class="lead mono">02-offline-vap-20s</td><td>Full 20s VAP forward, vap-only sticky mute</td><td>First mix that <em>sounded</em> like the overlap yield wanted</td></tr>
+            <tr><td class="lead mono">03-offline-twohead-v1mini</td><td>VAP overlap + v1-mini pause deny</td><td>Skips «آه»; license-locked head</td></tr>
+            <tr><td class="lead mono">04-offline-twohead-smartturn</td><td>VAP overlap + Smart Turn pause deny</td><td>Skips «آه» with the shippable pause head</td></tr>
+            <tr><td class="lead mono">05-streaming-1s</td><td>Deployable streamer, 1s transformer</td><td>Overlap on liannah <strong>weaker</strong> (0.10s vs 0.74s offline)</td></tr>
+            <tr class="highlight"><td class="lead mono">06-streaming-5s-recommended</td><td>Same streamer, 5s window</td><td>Liannah mute 0.76s — matches offline. <strong>The default.</strong></td></tr>
+            <tr><td class="lead mono">07-streaming-20s</td><td>20s window</td><td>Does not keep 10Hz (124ms/step). Too slow.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Liannah mute seconds (vap-only, sticky)</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Transformer window</th><th class="num">Sticky mute</th></tr></thead>
+          <tbody>
+            <tr><td class="lead">1 s</td><td class="num mono">0.10 s</td></tr>
+            <tr class="highlight"><td class="lead">5 s</td><td class="num mono"><b>0.76 s</b></td></tr>
+            <tr><td class="lead">Offline 20 s</td><td class="num mono">0.74 s</td></tr>
+            <tr><td class="lead">20 s streaming</td><td class="num mono">0.28 s <small>(coarser decode)</small></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13.5px;">«آه» two-head mute stays ~0.5&nbsp;s at every window — that's Smart Turn reacting to a pause, not the transformer window.</p>
+    </section>
+
+    <!-- ================= CPU ================= -->
+    <section id="cpu">
+      <div class="section-eyebrow">02 — The work</div>
+      <h2>CPU cost</h2>
+      <p class="lede"><span class="tag tag-fact">fact</span>Apple M5, arm64, 10 cores, 16GB, macOS, Python 3.12. Does not transfer to prod EKS — re-run on the agent-service box before a capacity plan. No <code>kubectl</code>, no cluster credentials from this research machine.</p>
+      <p>Pause classifiers fire once per VAD silence (~10–20/min). Method: warmup 10, then N=200 single inferences; sustained 15 inferences/min for 90s; 100% = one full core.</p>
+
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Model</th><th>Weights</th><th class="num">p50</th><th class="num">p95</th><th class="num">CPU% @15/min</th><th class="num">Disk</th></tr></thead>
+          <tbody>
+            <tr><td class="lead">NAMO v1 Multilingual</td><td class="mono">model_quant.onnx</td><td class="num mono"><b>7.05 ms</b></td><td class="num mono">8.75 ms</td><td class="num mono">3.8%</td><td class="num mono"><b>294.7 MB</b></td></tr>
+            <tr><td class="lead">Smart Turn v3.2</td><td class="mono">gpu.onnx <small>(CPU)</small></td><td class="num mono"><b>22.3 ms</b></td><td class="num mono">27.44 ms</td><td class="num mono">4.3%</td><td class="num mono">30.9 MB</td></tr>
+            <tr><td class="lead">Smart Turn v3.2</td><td class="mono">cpu.onnx</td><td class="num mono">24.5 ms</td><td class="num mono">30.4 ms</td><td class="num mono">3.7%</td><td class="num mono"><b>8.3 MB</b></td></tr>
+            <tr class="highlight"><td class="lead">LiveKit v1-mini</td><td class="mono">bundled</td><td class="num mono"><b>7.85 ms</b></td><td class="num mono"><b>8.08 ms</b></td><td class="num mono"><b>1.0%</b></td><td class="num mono">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>None of these is slow versus a 300&nbsp;ms conversational budget — dead air is the wait <em>policy</em>, not these milliseconds. At 15 pauses/min every row is idle (~1–4% of one core). <strong>CPU is not a reason to keep NAMO.</strong> v1-mini is the tightest (p50 ≈ p95 ≈ 8&nbsp;ms). Smart Turn had rare spikes (~85&nbsp;ms gpu-named, ~72&nbsp;ms cpu-named).</p>
+
+      <h3>VAP is a different unit</h3>
+      <p>VAP runs <strong>continuously</strong>, not once per pause — so cost is measured per concurrent call, not per inference.</p>
+
+      <div class="chart-card">
+        <div class="chart-title">Cores per concurrent call — log scale</div>
+        <div class="chart-note">Pause heads fire on demand (~15×/min); VAP must stay resident for the whole call. Note the axis: each gridline is 10× the last.</div>
+
+        <div class="chart-group-label">Pause heads (on-demand, expressed as continuous-equivalent)</div>
+        <div class="bar-row"><div class="bar-label">v1-mini</div><div class="bar-track"><div class="bar-fill" style="width:2%; min-width:3px; background:var(--accent);"></div></div><div class="bar-val">0.010</div></div>
+        <div class="bar-row"><div class="bar-label">Smart Turn <small>(cpu.onnx)</small></div><div class="bar-track"><div class="bar-fill" style="width:18.9%; background:var(--accent);"></div></div><div class="bar-val">0.037</div></div>
+        <div class="bar-row"><div class="bar-label">NAMO</div><div class="bar-track"><div class="bar-fill" style="width:19.3%; background:var(--accent);"></div></div><div class="bar-val">0.038</div></div>
+        <div class="bar-row"><div class="bar-label">Smart Turn <small>(gpu.onnx)</small></div><div class="bar-track"><div class="bar-fill" style="width:21.1%; background:var(--accent);"></div></div><div class="bar-val">0.043</div></div>
+
+        <div class="chart-group-label">VAP (overlap head, continuous)</div>
+        <div class="bar-row"><div class="bar-label">streaming, 1s</div><div class="bar-track"><div class="bar-fill" style="width:30.1%; background:var(--amber);"></div></div><div class="bar-val">0.080</div></div>
+        <div class="bar-row"><div class="bar-label"><b>streaming, 5s</b></div><div class="bar-track"><div class="bar-fill" style="width:42.4%; background:var(--amber);"></div></div><div class="bar-val"><b>0.187</b></div></div>
+        <div class="bar-row"><div class="bar-label">streaming, 20s</div><div class="bar-track"><div class="bar-fill" style="width:69.8%; background:var(--amber);"></div></div><div class="bar-val">1.245</div></div>
+        <div class="bar-row"><div class="bar-label">naive, 5s</div><div class="bar-track"><div class="bar-fill" style="width:76.7%; background:var(--red);"></div></div><div class="bar-val">2.000</div></div>
+
+        <div class="chart-axis"><div></div><div class="ticks">
+          <span style="left:0%;">0.01</span><span style="left:33.3%;">0.1</span><span style="left:66.6%;">1</span><span style="left:100%;">10</span>
+        </div><div></div></div>
+
+        <div class="legend" style="margin-top:16px;">
+          <div class="legend-item"><span class="legend-swatch" style="background:var(--accent);"></span>pause heads</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:var(--amber);"></span>VAP, streaming (this package)</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:var(--red);"></span>VAP, naive (do not ship)</div>
+        </div>
+      </div>
+
+      <p>Naive 5&nbsp;s window: <strong>2.0 cores per concurrent call</strong>. Streaming 5&nbsp;s (this package): <strong>0.187 cores/call</strong> at 10&nbsp;Hz — about <strong>4–5× Smart Turn's cost</strong>, but ~10× cheaper than the naive path it replaced. At 1,000 concurrent calls that is roughly 6 cores for Smart Turn firing on-demand, versus roughly 190 cores to keep VAP resident for every call — VAP is the expensive piece, structurally, because it can't fire only when needed.</p>
+    </section>
+
+    <hr class="div" />
+
+    <!-- ================= VAP BENCHMARKS ================= -->
+    <section id="vap-benchmarks">
+      <div class="section-eyebrow">03 — VAP deep-dive</div>
+      <h2>VAP's own benchmarks</h2>
+      <p class="lede">eot-bench is not a VAP benchmark — there is no hosted public leaderboard for VAP. The field uses a zero-shot event protocol defined with the model. <strong>We have not re-run these</strong>; numbers below are from the papers.</p>
+
+      <h3>Official protocol — Interspeech 2022</h3>
+      <p>Ekstedt &amp; Skantze, <a href="https://arxiv.org/abs/2205.09812">arXiv:2205.09812</a>. Labels from per-channel VAD, not human EOT. Dataset: Switchboard (LDC), 135 dialog test / 11-fold on the rest. Metric: weighted F1. S/H is hold-heavy (majority already .843).</p>
+
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Task</th><th>When</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td class="lead mono">S/H</td><td>Mutual silence</td><td>Shift vs Hold — who speaks next</td></tr>
+            <tr><td class="lead mono">S/L</td><td>Other-speaker onset</td><td>Short vs Long — backchannel vs a real turn</td></tr>
+            <tr><td class="lead mono">S-pred</td><td>Current speaker still talking</td><td>Upcoming turn grab</td></tr>
+            <tr><td class="lead mono">BC-pred</td><td>Current speaker still talking</td><td>Upcoming short listener response</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Model</th><th class="num">S/H (shift F1)</th><th class="num">S/L</th><th class="num">S-pred</th><th class="num">BC-pred</th></tr></thead>
+          <tbody>
+            <tr class="highlight"><td class="lead">Discrete VAP (paper)</td><td class="num mono"><b>.899</b> <small>(.510)</small></td><td class="num mono">.786</td><td class="num mono"><b>.733</b></td><td class="num mono"><b>.723</b></td></tr>
+            <tr><td class="lead">Majority class</td><td class="num mono">.843 <small>(0)</small></td><td class="num mono">.565</td><td class="num mono">.333</td><td class="num mono">.333</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Other VAP evals <small style="font-weight:400;color:var(--ink-faint);">(same idea, different data)</small></h3>
+      <p><strong>IWSDS 2024</strong> (<a href="https://arxiv.org/html/2401.04868v1">arXiv:2401.04868</a>) — Japanese travel-agency dialogs. Balanced accuracy of next-speaker in silences &gt;0.25s. This is the "1&nbsp;s transformer is enough" table — <strong>silence S/H, not talk-over-TTS</strong>: 1&nbsp;s = 76.16%, 20&nbsp;s = 74.20%.</p>
+      <p><strong>DualTurn</strong> (Anyreach, <a href="https://arxiv.org/abs/2603.08216">arXiv:2603.08216</a>) — re-runs VAP's 1s protocol on a fixed 138-session Switchboard split. Their VAP re-eval S/H is .843 (the paper's 11-fold was .899). DualTurn LoRA: S/H .985. <span class="tag tag-hyp">unverified here</span></p>
+      <p><strong>OV-pred</strong> (overlap prediction) appears in a multimodal VAP paper (IEICE 2024) — closest published metric to barge-in. Not run.</p>
+
+      <div class="callout">
+        <p><strong>What we measured:</strong> silent-ch1 VAP on eot-bench (pause-EOT) — Arabic FC@300ms 54.8% = VAD. That does not score VAP's actual job. The 51Talk n=1 listen mixes are qualitative, not this protocol. A real VAP number would need Switchboard (or our own stereo + VAD) and <code>vap.evaluation</code> — not another eot-bench pass.</p>
+      </div>
+    </section>
+
+    <!-- ================= VAP DATASETS ================= -->
+    <section id="vap-datasets">
+      <div class="section-eyebrow">03 — VAP deep-dive</div>
+      <h2>Which dataset to test VAP on</h2>
+      <p class="lede">None of Switchboard / Fisher / Candor is the Breez product test (Gulf user vs. TTS). They are human–human, almost all English. Pick by goal.</p>
+
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Goal</th><th>Dataset</th></tr></thead>
+          <tbody>
+            <tr><td>Reproduce the VAP paper (S/H, S/L, S-pred, BC-pred)</td><td class="lead"><strong>Switchboard</strong> — the official test set</td></tr>
+            <tr><td>Overlap / interruption, clean stereo</td><td class="lead"><strong>Candor</strong> — best of the three</td></tr>
+            <tr><td>Train a bigger English VAP</td><td class="lead">Switchboard + <strong>Fisher English</strong> (not needed to test)</td></tr>
+            <tr class="highlight"><td>Decide if VAP helps Breez</td><td class="lead"><strong>Our dual-track calls</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ul>
+        <li><strong>Switchboard</strong> — LDC, English telephone, ~260h, two channels. Our checkpoint was trained in this world. Paid license.</li>
+        <li><strong>Fisher</strong> — larger English telephone (LDC). Training hours, not the canonical test. Fisher Levantine Arabic is a <em>different corpus</em> — not what VAP papers used.</li>
+        <li><strong>Candor</strong> — 1,656 English Zoom calls, ~850h, 32kHz stereo, ~48% of transitions overlap. CC BY-NC + application. 2025 VAP papers use it (audio-only S/H ~79% balanced acc vs ~65% on Switchboard in the same study). Closer to WebRTC; still two humans.</li>
+      </ul>
+      <p><strong>Implication:</strong> Fisher is extra English hours, not a required test set. Switchboard only if a paper-comparable number is needed. Candor if a public overlap stress test is needed. The in-domain measurement is still dual-track <code>human.ogg</code> + <code>agent.ogg</code>.</p>
+    </section>
+
+    <!-- ================= SILENT-CH1 ================= -->
+    <section id="silent-ch1">
+      <div class="section-eyebrow">03 — VAP deep-dive</div>
+      <h2>The silent-ch1 54.8%, explained</h2>
+      <p class="lede">This number gets quoted a lot in this report as "VAP ≈ VAD baseline" — here is exactly how it was produced, so it doesn't get over-read as "VAP failed."</p>
+
+      <h3>Setup</h3>
+      <p>eot-bench audio is user-only. VAP wants stereo. The adapter (<code>eot-bench/eot_harness/vap_adapter.py</code>):</p>
+      <ol>
+        <li>User wav → channel 0</li>
+        <li>Zeros → channel 1 (KTH's own <code>add_zero_channel</code> helper)</li>
+        <li>Run the English Switchboard checkpoint</li>
+        <li><code>p_eot</code> = mean of <code>p_now</code> channel 1 over the last 200ms — "would the imaginary other speaker start in the next ~0.4s?"</li>
+      </ol>
+      <p>Transcripts unused. Score point 0.2s. Prefix ≤20s. <strong>That is a pause-EOT hack.</strong> On 51Talk, real agent audio was fed on ch1 — a different experiment.</p>
+
+      <h3>Why 54.8%</h3>
+      <p>eot-bench sweeps threshold × silence delay × timeout, then picks the point with mean latency ≤300ms and the fewest false cutoffs. The Arabic VAP operating point from the report: threshold <span class="mono">0.000</span> (every score "fires"), action_delay <span class="mono">0.300s</span>, detect 100%. That is <em>"wait 300ms of silence, always cut"</em> — the VAD timer. VAD baseline Arabic FC@300ms is also 54.8%.</p>
+      <p>English: threshold 0.19, FC 50.2% vs VAD 55.6% — scores did a little; still near a silence timer, far behind Smart Turn.</p>
+
+      <div class="callout callout-warn">
+        <p><strong>What it means.</strong> With no agent channel, "will the other speaker start?" is mostly <em>how long the user has been quiet</em> — the timer already knows that. This does <strong>not</strong> measure barge-in, and it does not mean VAP has no signal with a real second channel — that specific experiment (VAP-alone, real stereo, pause-EOT) has not been run.</p>
+      </div>
+    </section>
+
+    <hr class="div" />
+
+    <!-- ================= SMART TURN FINETUNE ================= -->
+    <section id="smart-turn-finetune">
+      <div class="section-eyebrow">04 — Scoped, not started</div>
+      <h2>Smart Turn retrain — scope</h2>
+      <p class="lede">Question: data effort, GPU hours, expected gain on Arabic FC@300ms. <strong>No training was run</strong> — no GPU job, no production audio, no 41GB download. Source: <a href="https://github.com/pipecat-ai/smart-turn">pipecat-ai/smart-turn</a> <code>train.py</code>, <code>train_modal.py</code>, and the data-contribution guide (cloned 2026-09-05).</p>
+
+      <div class="callout">
+        <p><span class="tag tag-opinion">opinion</span>A retrain is a <strong>second</strong> step after using stock v3.2. Stock already beats NAMO on Arabic by ~25pp. Domain adaptation waits on a Gulf train set that is <strong>disjoint</strong> from any 300–500-turn eval set. v1-mini scores cannot be used as labels — its Model License forbids training other models on its outputs.</p>
+      </div>
+
+      <h3>What their training script actually is <span class="tag tag-fact">fact</span></h3>
+      <div class="table-scroll">
+        <table>
+          <tbody>
+            <tr><td class="lead">Start weights</td><td class="mono"><strong>openai/whisper-tiny</strong> — not the published v3.2 ONNX</td></tr>
+            <tr><td class="lead">Head</td><td>New attention-pool + MLP, random init</td></tr>
+            <tr><td class="lead">Train set</td><td class="mono"><strong>270,946</strong> clips, <strong>41.4 GB</strong></td></tr>
+            <tr><td class="lead">Test set</td><td class="mono">31,527 clips</td></tr>
+            <tr><td class="lead">Epochs / batch</td><td class="mono"><strong>4</strong> / <strong>384</strong> train, 128 eval, no grad accumulation</td></tr>
+            <tr><td class="lead">LR</td><td class="mono">5e-5, cosine, warmup 0.2, weight decay 0.01</td></tr>
+            <tr><td class="lead">Input</td><td>last 8s of 16kHz mono → Whisper log-mel (80, 800)</td></tr>
+            <tr><td class="lead">Label</td><td class="mono">endpoint_bool (complete=1 / incomplete=0)</td></tr>
+            <tr><td class="lead">Export</td><td>FP32 ONNX → static int8 (1,024 calibration clips)</td></tr>
+            <tr><td class="lead">Cloud recipe</td><td><code>train_modal.py</code>: NVIDIA L4, 32GB RAM, 8 CPU, 24h timeout</td></tr>
+            <tr><td class="lead">Gotcha</td><td><code>do_training_run</code> raises without <code>WANDB_API_KEY</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>This is a full retrain from Whisper Tiny, not "continue from v3.2."</strong> Pipecat publishes ONNX only — a true continued fine-tune needs their unpublished <code>Trainer</code> checkpoint, or our own first export of <code>final_model/</code>. Optimizer steps on the public set: <span class="mono">270,946 × 0.9 / 384 × 4 ≈ 2,540</span>.</p>
+
+      <h3>GPU hours <span class="tag tag-hyp">unverified — not run</span></h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Job</th><th>Bound</th></tr></thead>
+          <tbody>
+            <tr><td>Full public retrain, match config, L4</td><td class="mono"><strong>~3–12 GPU-hours</strong></td></tr>
+            <tr><td>Same on a T4 16GB</td><td>longer; batch 384 may OOM</td></tr>
+            <tr><td>Mix 2–5k Gulf clips into the public set, 4 epochs</td><td class="mono">same ~3–12h — dataset size barely moves</td></tr>
+            <tr><td>Continue 1 epoch, Gulf-only ~2k clips</td><td class="mono">≪1 GPU-hour — blocked on the missing checkpoint</td></tr>
+            <tr><td>400-clip overfit</td><td>minutes. Not useful.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Wall clock is dominated by the 41GB download and on-demand FLAC decode, not by the 8M-param forward pass. <strong>Money is not the constraint — labelling time is the cost.</strong></p>
+
+      <h3>Data prep <span class="tag tag-opinion">opinion, after an export exists</span></h3>
+      <p>Format is fixed by the guide: mono FLAC, 16-bit, 16kHz, one speaker, ≤16s, target 50:50 complete/incomplete, each clip ending in ~200ms silence. Incomplete must end on a filler / connective / hanging prosody — never mid-word.</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Step</th><th>Effort</th></tr></thead>
+          <tbody>
+            <tr><td>Silence spans</td><td>shared with the eot-bench eval set</td></tr>
+            <tr><td>Slice FLACs + JSONL metadata</td><td class="mono">~1 engineer day</td></tr>
+            <tr><td>Listen-QC ~20% + every Arabic filler edge case</td><td class="mono">~1 day</td></tr>
+            <tr><td>Legal / consent for <strong>training</strong> use</td><td><strong>unknown — product/legal</strong></td></tr>
+            <tr class="highlight"><td class="lead">Total once export exists</td><td class="mono"><strong>~2–4 engineer days</strong> + legal</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Two hard rules: 300–500 turns is an <em>eval</em> set (≈1k clips — tiny next to 271k), and Breez customer audio stays private — BSD-2 covers weights we train, not a right to publish callers on Pipecat's public HF.</p>
+
+      <h3>Expected gain <span class="tag tag-hyp">hypothesis, not fact</span></h3>
+      <p>No public number exists for "Arabic telephony fine-tune → Δ FC@300ms." Anyone quoting one is guessing. Pipecat's own v3.2 clip benchmark (n=31,527): overall 93.71%, English 94.71%, <strong>Arabic 89.12%</strong> (n=947, FPR 7.07%) — 4th-worst of 23 languages. <strong>That 89% is not the 39.2% FC@300ms</strong> — theirs is isolated complete/incomplete clips; this study's number is streaming false-cutoff at a 300ms budget. Not the same metric.</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Outcome for a 2–5k Gulf mix-in</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td class="lead">0–3pp better</td><td>public Arabic + cafe noise already near our domain</td></tr>
+            <tr><td class="lead">5–10pp better</td><td>real gap is telephony, Gulf fillers, Krisp-gated zeros</td></tr>
+            <tr class="bad"><td class="lead">Worse</td><td>trained on the eval set, overfit a few hundred clips, or drowned by the TTS-heavy public mix</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>On present evidence a fine-tune is <strong>not guaranteed</strong> to catch v1-mini (24.4%). It is how we try to close that gap <em>without</em> the 1.6.x upgrade. Success metric if we ever train: FC@300ms on the held-out Gulf set vs stock v3.2 on the same set — not clip accuracy.</p>
+    </section>
+
+    <!-- ================= LIVEKIT UPGRADE ================= -->
+    <section id="livekit-upgrade">
+      <div class="section-eyebrow">04 — Scoped, not started</div>
+      <h2>livekit-agents 1.4.5 → 1.6.x — scope</h2>
+      <p class="lede">Question: what breaks if production upgrades with a forked <code>AudioRecognition</code>? Read-only. The upgrade was not started; agent-service was not copied into this tree. Diffed upstream <code>github.com/livekit/agents</code> at 1.4.5 (reported production pin) vs 1.6.10.</p>
+
+      <div class="callout">
+        <p><span class="tag tag-opinion">opinion</span><strong>v1-mini is available as a pause head</strong> if agent-service drops the fork. Re-porting <code>breez_audio_recognition_v2.py</code> onto 1.6 and keeping NAMO is a large change, and it fights the model the upgrade would be for.</p>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Path</th><th>What we do</th><th>Effort</th><th>v1-mini real?</th></tr></thead>
+          <tbody>
+            <tr class="highlight"><td class="lead">A. Drop fork</td><td>Bump SDK, pass <code>inference.TurnDetector(version="v1-mini")</code>, delete NAMO + proportional delay + ST stub</td><td>Turn wiring S–M; whole bump M–L</td><td><strong>Yes</strong></td></tr>
+            <tr><td class="lead">B. Re-port fork</td><td>Replay NAMO / proportional / ST override onto the new class</td><td>L on top of the bump</td><td>No — still a text detector</td></tr>
+            <tr><td class="lead">C. Stay on 1.4.5</td><td>Unstub Smart Turn only</td><td>S</td><td>No</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Path C is the pause-head finding in this report. This scope exists so Path A is a <em>known</em> cost, not an unknown.</p>
+
+      <h3>Scale of the change <span class="tag tag-fact">fact</span></h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th></th><th class="num">1.4.5</th><th class="num">1.6.10</th></tr></thead>
+          <tbody>
+            <tr><td class="lead"><code>AudioRecognition</code></td><td class="num mono">752 lines</td><td class="num mono"><strong>1,960 lines</strong></td></tr>
+            <tr><td class="lead">Commits touching that file</td><td class="num">—</td><td class="num mono"><strong>39</strong></td></tr>
+            <tr><td class="lead"><code>AgentSession</code></td><td class="num mono">1,484 lines</td><td class="num mono">2,130 lines</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>v1-mini first ships in <strong>1.6.1</strong>; 1.6.10 adds ~176 more lines of fixes — <strong>do not pin the first v1-mini tag.</strong> Weights live in the core SDK (<code>livekit.agents.inference.TurnDetector</code>), not the deprecated text-model plugin.</p>
+
+      <h3>What breaks</h3>
+      <ol>
+        <li><strong>The methods a fork would override are gone.</strong> 1.4.5 used <code>start()</code>/<code>push_audio()</code>/<code>update_options()</code>; 1.6.10 calls <code>_start()</code>/<code>_push_audio()</code>/<code>_update_options()</code>. A 1.4.5-style subclass <strong>silently no-ops</strong> after the bump — no crash, just dead turn detection.</li>
+        <li><strong>Constructor and delay API changed.</strong> Delays moved into <code>EndpointingOptions</code> (<code>min_delay</code>/<code>max_delay</code>). Breez's proportional 0.2–2.0s curve is <strong>not upstream</strong> and would need re-injecting.</li>
+        <li><strong>Two detector protocols now</strong> — text (<code>_TurnDetector</code>, still supports NAMO) and streaming (<code>_StreamingTurnDetector</code>, v1/v1-mini). Plugging a text detector no longer needs a fork at all.</li>
+        <li><strong>The default flipped.</strong> Self-hosted with no detector passed now auto-selects <strong>v1-mini</strong>. <strong>Trap:</strong> bump the SDK, forget to pass a detector, and the process silently runs v1-mini.</li>
+        <li><strong><code>RecognitionHooks</code> grew</strong> — new callbacks for interruption, backchannel, transcription timeout, EOT prediction. Any Breez hook object that isn't a full <code>AgentActivity</code> is now incomplete.</li>
+        <li><strong>Adaptive interruption is a third, separate model.</strong> <code>InterruptionOptions.mode="adaptive"</code> classifies barge-in vs backchannel — not v1-mini, not VAP, unmeasured on Arabic. <span class="tag tag-hyp">hypothesis</span> — the bump doesn't automatically supply an overlap head.</li>
+        <li><strong>Krisp is compatible.</strong> Streaming detector needs <code>vad.min_silence_duration ≥ 0.25s</code>; prod Krisp is 0.45s, so it clears. Keep passing Krisp explicitly so 1.6 doesn't substitute Silero.</li>
+      </ol>
+
+      <h3>License <small style="font-weight:400;color:var(--ink-faint);">(unchanged)</small></h3>
+      <p><a href="https://github.com/livekit/agents/blob/main/MODEL_LICENSE">LiveKit Model License</a>: usable only inside LiveKit Agents, cannot be extracted, cannot be used to train other models. We already qualify at 1.4.5; 1.6.1 is when the weights ship. Local mini weights ~108MB resident. Our bench: p50 <span class="mono">7.85 ms</span>, ~1% of a core at 15 pauses/min.</p>
+
+      <h3>Path A shape <span class="tag tag-opinion">opinion — not started</span></h3>
+      <pre><code>from livekit.agents import AgentSession, inference
+from livekit.agents.voice.turn import TurnHandlingOptions
+
+session = AgentSession(
+    vad=krisp_vad,                      # keep; min_silence &gt;= 0.25
+    turn_handling=TurnHandlingOptions(
+        turn_detection=inference.TurnDetector(version="v1-mini"),
+        endpointing={"min_delay": 0.3, "max_delay": 2.5},   # retune after Gulf eval
+        # interruption: pin mode="vad" until Arabic barge-in is measured
+    ),
+    # stt, llm, tts ...
+)</code></pre>
+      <p>Pin 1.6.10. Stop monkey-patching <code>AudioRecognition</code>. Keep provider-mode workflows on <code>turn_detection="stt"</code>. Delete NAMO, <code>ProportionalTurnDetector</code>, and the ST stub from the EOU path.</p>
+      <p>Path B, for contrast: re-apply a custom <code>_run_eou_detection</code> onto a 1,960-line class that now has a streaming detector, an STT pipeline object, adaptive interruption, transcription timeouts, and user-turn limits — <strong>~1–2 extra engineering weeks</strong> after the bump compiles, with real regression risk on barge-in and provider mode.</p>
+
+      <h3>Still unknown without an agent-service checkout</h3>
+      <ul>
+        <li>Is the patch <code>AudioRecognition = BreezAudioRecognition</code>, or a subclass — and which methods are overridden?</li>
+        <li><strong>Every other</strong> LiveKit monkey-patch in agent-service. That, not EOU, decides how hard 1.6.x really is.</li>
+        <li>Does <code>AgentSession(...)</code> already pass <code>turn_detection=</code> (NAMO), or rely on the 1.4.5 VAD default?</li>
+      </ul>
+    </section>
+
+    <!-- ================= VAP FINETUNE ================= -->
+    <section id="vap-finetune">
+      <div class="section-eyebrow">04 — Scoped, not started</div>
+      <h2>What a VAP fine-tune would need</h2>
+      <p class="lede"><span class="tag tag-hyp">scoped from papers + trainer docs. No training run.</span> VAP can be improved, and a domain-adapted VAP can become the overlap head. It should <strong>not</strong> replace Smart Turn until pause-EOT is measured on real stereo (user + TTS), which eot-bench cannot do. The 300–500 Gulf turns planned for Smart Turn are the <strong>wrong grain</strong> for VAP training.</p>
+
+      <h3>What "rely on VAP" actually means</h3>
+      <p>VAP does not output "turn complete." It outputs who will be voiced in the next ~0.2–2s.</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Use</th><th>Rule</th><th>Needs fine-tune?</th></tr></thead>
+          <tbody>
+            <tr><td class="lead">Overlap (TTS playing)</td><td>yield if <span class="mono">p_user &gt; p_agent</span>, sticky</td><td>Domain gap is user-vs-TTS, not two humans. Yes, for Gulf barge-in / «آه»</td></tr>
+            <tr class="bad"><td class="lead">Pause / S-H (both quiet)</td><td>next speaker from <code>p_now</code></td><td><strong>Hypothesis.</strong> Silent-ch1 VAP = VAD on eot-bench. Stereo VAP with real agent history is unmeasured</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Fact, from <a href="https://aclanthology.org/2024.lrec-main.1036/">Inoue et al., LREC-COLING 2024</a>: a VAP trained on one language does <strong>not</strong> transfer to another. A single model trained on all languages together matches the monolingual models. So "multilingual" means <strong>mix the hours in one training run</strong>, not train English and hope Arabic works.</p>
+
+      <h3>What you fine-tune</h3>
+      <p>Architecture: frozen CPC encoder (English Libri-light/Librispeech pretrain) → per-channel self-attention → cross-attention → two heads (256-way VAP state + 2-way VAD). Inoue's <code>train.py</code> flag <code>--vap_freeze_encoder 1</code> keeps CPC frozen — you train transformers + heads. Loss: <code>L = L_vap + L_vad</code>. Labels are <strong>per-channel VAD</strong>, not complete/incomplete text.</p>
+      <p>Do <strong>not</strong> freeze the transformers if the domain is Gulf telephony vs Switchboard. Do <strong>not</strong> channel-flip 50/50 the way human–human VAP does — user and TTS are not interchangeable. Keep ch0=user, ch1=TTS at playout.</p>
+      <p><span class="tag tag-hyp">hypothesis</span>Optional second fine-tune (Inoue BC models): same encoder, replace <code>p_now</code>/<code>p_future</code> with <code>p_bc_react</code>/<code>p_bc_emo</code> — needs backchannel tags ~500ms ahead. That's how you might teach «آه» without Smart Turn. Japanese ERICA WoZ only so far.</p>
+
+      <h3>How much data</h3>
+      <p>The multilingual paper balanced each language to the smallest set:</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Language</th><th>Corpus</th><th class="num">Hours in the mix</th></tr></thead>
+          <tbody>
+            <tr><td>English</td><td>Switchboard</td><td class="num mono"><strong>92.5h</strong> train / 11.5h val</td></tr>
+            <tr><td>Mandarin</td><td>HKUST telephone</td><td class="num mono">92.5h / 11.5h</td></tr>
+            <tr><td>Japanese</td><td>Travel-agency Zoom</td><td class="num mono">92.5h / 11.5h</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><span class="tag tag-hyp">hypothesis, not published</span></p>
+      <ul>
+        <li><strong>Eval:</strong> tens of dual-track sessions (minutes each), held out — not 400 isolated turns.</li>
+        <li><strong>Train, first try:</strong> on the order of <strong>10–30h</strong> of Gulf user+TTS stereo, mixed with public hours.</li>
+        <li><strong>Train, paper-scale:</strong> ~<strong>90h</strong> in-domain, matching their per-language budget.</li>
+        <li>The Smart Turn export of 300–500 turns is clips, not 90h of stereo — use it to <em>score</em> overlap/S-H, not to train VAP.</li>
+      </ul>
+
+      <h3>Data preparation</h3>
+      <p><strong>1. Sessions, not clips.</strong> Each call is one stereo WAV covering the whole session: 16kHz 16-bit, ch0 = Krisp-cleaned user, ch1 = agent TTS as played (not as generated). If ch1 leads the ear by hundreds of ms, the model learns fake overlap.</p>
+      <p><strong>2. Per-channel VAD lists</strong> — the only required labels. One JSON per session:</p>
+      <pre><code>[
+  [[t0, t1], [t2, t3], ...],  # user voiced intervals, seconds
+  [[t0, t1], ...],            # agent/TTS voiced intervals
+]</code></pre>
+      <p>Source: energy/VAD on each track independently. Do <strong>not</strong> label from STT complete/incomplete.</p>
+      <p><strong>3. Sliding CSV</strong> — columns <code>audio_path, start, end, vad_list, session, dataset</code>. Each row = 20s of audio; <code>vad_list</code> must cover <strong>22s</strong> (20s + 2s horizon), or the last 2s of every chunk has no target. Splits by <em>session</em>, not by row — never put two windows from the same call in train and test.</p>
+      <p><strong>4. Legal.</strong> Customer audio stays private. Public Switchboard/HKUST/Fisher are LDC-licensed; Candor is CC BY-NC. Inoue's shipped weights are academic-only — fine-tuning into a production checkpoint needs a license path. <strong>Unknown — legal.</strong></p>
+
+      <h3>Already ruled out</h3>
+      <ul>
+        <li>Train on 400 turns — too small, wrong label type.</li>
+        <li>Silent agent channel — that's VAD.</li>
+        <li>1s transformer as the overlap default (51Talk).</li>
+        <li>Expecting an English checkpoint to "just work" on Arabic (cross-lingual loss jumps in the paper's own table).</li>
+      </ul>
+    </section>
+
+    <hr class="div" />
+
+    <!-- ================= VAP RUNTIME ================= -->
+    <section id="vap-runtime">
+      <div class="section-eyebrow">05 — Reference</div>
+      <h2>VAP runtime</h2>
+      <p class="lede">The optimized overlap head, ready to copy into agent-service (or a sidecar) as a starting point. Not wired to LiveKit. Third-party code under <code>third_party/vap/</code> is KTH Voice Activity Projection (Erik Ekstedt); the Switchboard training dump is not included.</p>
+
+      <h3>Before → after</h3>
+      <p>Every 100ms, the naive version concatenated new audio onto a rolling N-second buffer and ran the <strong>entire</strong> forward pass: CPC convs + LSTM + downsample + both transformers + heads. Profile: CPC encoder <strong>~90%</strong> of the forward, both transformers ~9.4%. A perfect transformer KV-cache is therefore capped at ~10% savings — that's why one wasn't built.</p>
+
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Method</th><th class="num">Size</th><th>Fidelity</th><th>Speed</th></tr></thead>
+          <tbody>
+            <tr><td class="lead">fp32</td><td class="num mono">22.1 MB</td><td>—</td><td>baseline</td></tr>
+            <tr class="bad"><td class="lead">Torch int8 (qnnpack, Linear only)</td><td class="num mono">11.9 MB</td><td class="mono">r 0.9999, 99.8% agree</td><td><strong>0.76× slower</strong></td></tr>
+            <tr class="bad"><td class="lead">ONNX int8</td><td class="num mono">−3.4%</td><td class="mono">r 0.58, 77% agree</td><td><strong>broken</strong></td></tr>
+            <tr><td class="lead">ONNX fp32</td><td class="num mono">same</td><td>bit-exact</td><td>viable export later</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>On Apple Silicon, torch int8 needs <code>torch.backends.quantized.engine = "qnnpack"</code> or you get <code>NoQEngine</code>. Still not worth it — the workload is not weight-bound. int8 never touches the CPC conv stack that dominates time.</p>
+      <p>Naive truncation of the waveform (just passing the last 1s in) does <strong>not</strong> match a 20s forward — agreement ~70–77%, flat from 10s down to 0.5s. That implicates <strong>lost CPC LSTM state</strong>, not transformer length; you cannot make it cheaper by shortening the wav you feed.</p>
+
+      <h3>What the streaming wrapper does</h3>
+      <ol>
+        <li><strong>Overlap-save <code>gEncoder</code></strong> (strided convs are not causal) — look back 4 hops (640 samples), hold back the last 2 hops (20ms) until the next chunk supplies right-context. Leftover-only chunking mismatched offline by mean abs ~0.4; overlap-save matches to ~1e-6.</li>
+        <li><strong>LSTM hidden per channel.</strong> The two stereo channels share one <code>EncoderCPC</code> — <code>keepHidden=True</code> is never set on that shared module, or channel 0 would leak into channel 1.</li>
+        <li><strong>Causal downsample tail</strong> so 100Hz → 50Hz matches the offline conv.</li>
+        <li><strong>Transformers see only the last <code>transformer_ctx_sec</code></strong> of 50Hz features — default <strong>5.0s</strong>.</li>
+      </ol>
+      <p>Fidelity: encoder features match offline to max abs <span class="mono">3e-6</span>; <code>p_now</code> vs the same transformer window (holdback-aligned) is bit-exact (r=1, 100% agree). 1s vs 20s transformer still disagrees ~18% of frames — they are not the same model; that's what showed up as missed barge-in at 1s.</p>
+
+      <h3>Cost, defaults, and constants</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Setup</th><th class="num">p50</th><th class="num">Cores/call</th><th>Real-time @10Hz?</th></tr></thead>
+          <tbody>
+            <tr class="bad"><td class="lead">Naive, 5s re-forward</td><td class="num mono">~200 ms</td><td class="num mono"><strong>2.00</strong></td><td>no</td></tr>
+            <tr><td class="lead">Streaming, 1s</td><td class="num mono">8.0 ms</td><td class="num mono">0.080</td><td>yes</td></tr>
+            <tr class="highlight"><td class="lead">Streaming, <strong>5s (default)</strong></td><td class="num mono"><strong>18.7 ms</strong></td><td class="num mono"><strong>0.187</strong></td><td><strong>yes</strong></td></tr>
+            <tr class="bad"><td class="lead">Streaming, 20s</td><td class="num mono">124.5 ms</td><td class="num mono">1.245</td><td>no</td></tr>
+            <tr><td class="lead">Smart Turn <small>(for scale)</small></td><td class="num mono">~22 ms</td><td class="num mono">0.043</td><td>n/a — fires on pauses</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Default</th><th>Value</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td class="lead">Sample rate</td><td class="mono">16000</td><td>Model constant</td></tr>
+            <tr><td class="lead">Channel order</td><td class="mono">0 user, 1 agent</td><td>Training convention</td></tr>
+            <tr><td class="lead"><code>transformer_ctx_sec</code></td><td class="mono">5.0</td><td>1s missed 51Talk barge-in; 20s misses 10Hz</td></tr>
+            <tr><td class="lead">Step rate</td><td class="mono">10 Hz</td><td>2Hz is too slow to notice barge-in</td></tr>
+            <tr><td class="lead">Yield rule</td><td class="mono">p_user &gt; p_agent</td><td>while agent VAD &gt; 0.5, then sticky to end of TTS island</td></tr>
+            <tr><td class="lead"><code>keepHidden</code></td><td class="mono">never</td><td>would leak ch0 LSTM into ch1</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Model: 5.79M params, 22MB fp32, English/Switchboard — no Arabic weights trained. RSS: ~120MB on load, ~165MB per naive stream.</p>
+
+      <h3>What this is not</h3>
+      <ul>
+        <li>Not quantized (tried; rejected above)</li>
+        <li>Not ONNX (fp32 export was bit-exact and is a possible later format; int8 ONNX broke the model)</li>
+        <li>Not an Arabic fine-tune</li>
+        <li>Not a KV-cache transformer (wrong lever — CPC is 90% of the cost)</li>
+      </ul>
+    </section>
+
+    <hr class="div" />
+
+    <!-- ================= OPEN ================= -->
+    <section id="open">
+      <div class="section-eyebrow">05 — Reference</div>
+      <h2>Still open</h2>
+      <p class="lede">Consolidated from the scope note and the recommendation — the questions this study could not close.</p>
+      <ol>
+        <li><strong>A held-out Gulf/Levantine eval set</strong> (hundreds of real turns). The only gap that can reorder the pause-head ranking — public eot-bench Arabic is not this traffic.</li>
+        <li><strong>Whether LiveKit Agents 1.6.x is worth taking</strong> for v1-mini. That path means dropping the <code>AudioRecognition</code> fork, not re-porting it.</li>
+        <li><strong>VAP as an overlap head</strong>, behind a flag, after it's compared to a duration heuristic. English checkpoint, n=1 Gulf call so far.</li>
+        <li><strong>CPU on production Linux nodes</strong>, before any capacity claim — everything here is one Apple M5.</li>
+        <li><strong>Duration-heuristic overlap baseline:</strong> ignore user speech shorter than ~300ms while TTS plays. VAP has to beat that rule, not beat doing nothing.</li>
+        <li><strong>Adaptive interruption in LiveKit 1.6.x</strong> (<code>InterruptionOptions.mode="adaptive"</code>) — a third model, unmeasured on Arabic. The SDK bump does not automatically supply an overlap head.</li>
+        <li><strong>Every other LiveKit patch in agent-service.</strong> Those, not EOU, dominate the real cost of 1.6.x. The service tree was not on the machine used for this work.</li>
+      </ol>
+    </section>
+
+    <!-- ================= SOURCES ================= -->
+    <section id="sources">
+      <div class="section-eyebrow">05 — Reference</div>
+      <h2>Sources &amp; provenance</h2>
+
+      <h3>Third-party code &amp; weights</h3>
+      <p>Voice Activity Projection (<code>third_party/vap</code>) — Copyright Erik Ekstedt / KTH Speech, Music and Hearing. Source: <a href="https://github.com/ErikEkstedt/VoiceActivityProjection">ErikEkstedt/VoiceActivityProjection</a>. CPC encoder components derived from <a href="https://github.com/facebookresearch/CPC_audio">Facebook Research CPC_audio</a>. The English stereo checkpoint <code>VAP_3mmz3t0u_50Hz_ad20s_134-epoch9-val_2.56.pt</code> is the example weight from that project; first load may download <code>60k_epoch4-d0f474de.pt</code> from Facebook's public CPC URL.</p>
+      <p>The Breez wrapper (<code>breez_vap/</code> — streaming overlap-save CPC, policy, examples) is Breez research code, 2026-09.</p>
+
+      <div class="callout callout-neg">
+        <p><strong>Recordings notice.</strong> <code>recordings/</code> includes a HeyBreez / 51Talk customer call used internally for research. Not for public distribution. Keep this repository private.</p>
+      </div>
+
+      <h3>Papers</h3>
+      <ul>
+        <li>Ekstedt &amp; Skantze, "Voice Activity Projection," Interspeech 2022 — <a href="https://arxiv.org/abs/2205.09812">arXiv:2205.09812</a></li>
+        <li>Inoue et al., real-time VAP, IWSDS 2024 — <a href="https://arxiv.org/html/2401.04868v1">arXiv:2401.04868</a></li>
+        <li>Inoue et al., multilingual VAP, LREC-COLING 2024 — <a href="https://aclanthology.org/2024.lrec-main.1036/">ACL Anthology 2024.lrec-main.1036</a></li>
+        <li>DualTurn (Anyreach) — <a href="https://arxiv.org/abs/2603.08216">arXiv:2603.08216</a> · code: <a href="https://github.com/anyreachai/dualturn">anyreachai/dualturn</a></li>
+      </ul>
+
+      <h3>Code &amp; benchmarks</h3>
+      <ul>
+        <li>eot-bench — <a href="https://github.com/livekit/eot-bench">github.com/livekit/eot-bench</a></li>
+        <li>Smart Turn v3.2 training — <a href="https://github.com/pipecat-ai/smart-turn">github.com/pipecat-ai/smart-turn</a></li>
+        <li>NAMO v1 Multilingual — <a href="https://huggingface.co/videosdk-live/Namo-Turn-Detector-v1-Multilingual">HuggingFace</a></li>
+        <li>LiveKit Agents — <a href="https://github.com/livekit/agents">github.com/livekit/agents</a> · <a href="https://github.com/livekit/agents/blob/main/MODEL_LICENSE">Model License</a></li>
+      </ul>
+
+      <p style="margin-top:28px;"><a class="backtotop" href="#recommendation">↑ Back to Recommendation</a></p>
+    </section>
+
+    </div>
+
+    <footer class="page-foot">
+      Compiled from <code>turn-detection-research/</code> (README, RECOMMENDATION, 11 research notes, vap-runtime docs) for internal review. Every table, number, and label above is transcribed from that source, not summarized away — including fact / opinion / hypothesis / as-reported distinctions. 2026-09-05.
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+  var sections = links.map(function(a){ return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+  function onScroll(){
+    var y = window.scrollY + 120;
+    var current = sections[0];
+    for (var i=0;i<sections.length;i++){
+      if (sections[i].offsetTop <= y) current = sections[i];
+    }
+    links.forEach(function(a){
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current.id);
+    });
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+})();
+</script>

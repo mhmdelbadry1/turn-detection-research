@@ -32,7 +32,7 @@ v1-mini and Smart Turn match the published leaderboard **exactly** (unrounded).
 - **v1-mini wins pause-EOT** on this public set. We cannot ship it without LiveKit Agents 1.6.x.
 - **Smart Turn is the shippable audio pause head.** ~15 pp worse than v1-mini on Arabic, ~16 pp better than VAD, ~25 pp better than NAMO.
 - **NAMO’s 84.9% standalone accuracy is offline, full-transcript.** The 64.6% is causal with 0.5 s transcript lag — the setting that matches streaming STT. The gap is the “NAMO inherits STT lag” claim, quantified.
-- **VAP with a silent agent channel is not a pause detector.** It matches VAD. That is expected: projection of “who speaks next” with no agent audio is mostly silence duration, which the harness already sweeps.
+- **VAP with a silent agent channel is not a pause detector.** Arabic FC@300ms **54.8%** is the same number as the VAD timer because the sweep set **threshold = 0** (ignore the model, wait 300 ms). How that adapter was built: [08-vap-silent-ch1.md](08-vap-silent-ch1.md).
 
 ## Fusion (2026-09-03)
 

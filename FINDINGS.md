@@ -1,1 +1,0 @@
-Moved to [RECOMMENDATION.md](RECOMMENDATION.md).

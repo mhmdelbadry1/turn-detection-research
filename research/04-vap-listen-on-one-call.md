@@ -1,6 +1,6 @@
 # 51Talk listen (n=1)
 
-Session `656e9b45-5eeb-4fce-9295-d919fe212464`. Source tracks: `recordings/00-source-tracks/`. **n=1 — do not treat this as a benchmark.**
+Session `656e9b45-5eeb-4fce-9295-d919fe212464`. Source tracks: `recordings/00-source-tracks/`. **n=1 — not a benchmark.**
 
 Overlap on the call: **7.5 s**. The long «لأنه...» user span is mostly silence + agent TTS. Isolated «آه.» is **0.82 s** of real audio.
 
@@ -27,7 +27,7 @@ We cannot restore TTS that was already cut in the exported agent ogg. “After�
 | `04-offline-twohead-smartturn` | VAP overlap + Smart Turn pause deny | Skips «آه» with the shippable pause head |
 | `05-streaming-1s` | Deployable streamer, **1 s** transformer | Overlap on liannah **weaker** (0.10 s mute vs 0.74 s offline) |
 | `06-streaming-5s-recommended` | Same streamer, **5 s** window | Liannah mute **0.76 s** — matches offline. This is the default. |
-| `07-streaming-20s` | 20 s window | Does not keep 10 Hz (124 ms/step). Do not ship. |
+| `07-streaming-20s` | 20 s window | Does not keep 10 Hz (124 ms/step). Too slow. |
 
 Inside streaming folders:
 

@@ -1,12 +1,12 @@
 # livekit-agents 1.4.5 → 1.6.x — scope (2026-09-05)
 
-Brief item 6: what breaks when upgrading with our forked `AudioRecognition`? **Read-only. Upgrade not started. agent-service not copied.**
+Question: what breaks if production upgrades with a forked `AudioRecognition`? Read-only. The upgrade was not started. agent-service was not copied into this tree.
 
-Diffed upstream `github.com/livekit/agents` at `livekit-agents@1.4.5` (our pin) vs `livekit-agents@1.6.10`.
+Diffed upstream `github.com/livekit/agents` at `livekit-agents@1.4.5` (reported production pin) vs `livekit-agents@1.6.10`.
 
 ## Verdict (opinion)
 
-**v1-mini is a real production option** — if agent-service **drops the fork**. It is not "re-port `breez_audio_recognition_v2.py` onto 1.6 and keep NAMO." That re-port is Large and fights the very model we would upgrade for.
+**v1-mini is available as a pause head** if agent-service **drops the fork**. Re-porting `breez_audio_recognition_v2.py` onto 1.6 and keeping NAMO is a large change, and it fights the model the upgrade would be for.
 
 | Path | What we do | Effort | v1-mini real? |
 |---|---|---|---|
@@ -14,7 +14,7 @@ Diffed upstream `github.com/livekit/agents` at `livekit-agents@1.4.5` (our pin) 
 | **B. Re-port the fork** | Replay NAMO / proportional / ST override onto the new class | **L** on top of the bump | No — still a text detector |
 | **C. Stay on 1.4.5** | Unstub Smart Turn only | **S** | No |
 
-Path C is the recommendation in [RECOMMENDATION.md](../RECOMMENDATION.md). This note exists so Path A is a scheduling decision, not an unknown.
+Path C is the pause-head finding in [FINDINGS.md](../FINDINGS.md). This note exists so Path A is a known cost, not an unknown.
 
 ## Scale of the change (fact)
 
@@ -42,11 +42,11 @@ v1-mini first ships in **1.6.1**; 1.6.10 adds ~176 more lines of `audio_recognit
 | Endpointing default | 0.5 / 3.0 s | same, or **0.3 / 2.5 s** when the detector streams |
 | Default VAD if omitted | none | bundled **Silero** |
 
-Self-hosted `start` (our EKS case) auto-selects **v1-mini**. Cloud or `dev` with LiveKit creds selects full **v1** — not a Breez daily path. **Trap:** bump the SDK, forget to pass NAMO, and you silently ship v1-mini. Desired under Path A; a surprise otherwise.
+Self-hosted `start` (the EKS case) auto-selects **v1-mini**. Cloud or `dev` with LiveKit creds selects full **v1** — not a self-hosted daily path. **Trap:** bump the SDK, forget to pass a detector, and the process silently runs v1-mini. That is Path A; it is a surprise if NAMO was intended to stay.
 
 **5. `RecognitionHooks` grew** — added `on_interruption`, `on_backchannel_confirmed`, `on_transcription_timeout`, `on_eot_prediction`, `on_agent_backchannel_opportunity`, `on_user_turn_exceeded`, and `speech_start_time` on `on_start_of_speech`. Any Breez hook object that is not a full `AgentActivity` is now incomplete.
 
-**6. Adaptive interruption is a third, separate model.** 1.6.x `InterruptionOptions.mode = "adaptive"` classifies barge-in vs backchannel. It is **not** v1-mini and **not** VAP. Unmeasured on Arabic. Do not assume the bump hands us an overlap head for free — **hypothesis**, not a finding.
+**6. Adaptive interruption is a third, separate model.** 1.6.x `InterruptionOptions.mode = "adaptive"` classifies barge-in vs backchannel. It is **not** v1-mini and **not** VAP. Unmeasured on Arabic. The bump does not automatically provide an overlap head — **hypothesis**, not a finding.
 
 **7. Krisp is compatible.** The streaming detector requires `vad.min_silence_duration ≥ 0.25 s`; prod Krisp is 0.45 s (as reported), so it clears. Keep passing Krisp explicitly so 1.6 does not substitute Silero. Arabic is among the 14 supported languages, with per-language thresholds overridable via `unlikely_threshold={"ar": ...}` after Gulf eval.
 
@@ -54,7 +54,7 @@ Self-hosted `start` (our EKS case) auto-selects **v1-mini**. Cloud or `dev` with
 
 [LiveKit Model License](https://github.com/livekit/agents/blob/main/MODEL_LICENSE): usable **only inside LiveKit Agents**, cannot be extracted, **cannot be used to train other models**. We already qualify at 1.4.5; 1.6.1 is when the weights ship. Local mini weights are ~108 MB resident. Our CPU bench: p50 **7.85 ms**, ~1% of a core at 15 pauses/min (M5, not EKS).
 
-## Path A shape (opinion — do not start until scheduled)
+## Path A shape (opinion — not started)
 
 ```python
 from livekit.agents import AgentSession, inference
@@ -75,7 +75,7 @@ Pin `1.6.10`. Stop monkey-patching `AudioRecognition`. Keep provider-mode workfl
 
 Path B, for contrast: re-apply a custom `_run_eou_detection` onto a 1,960-line class that now has a streaming detector, an STT pipeline object, adaptive interruption, transcription timeouts, and user-turn limits — **~1–2 extra engineering weeks** after the bump compiles, with real regression risk on barge-in and provider mode.
 
-## Still needs Omar
+## Still unknown without an agent-service checkout
 
 1. Is the patch `AudioRecognition = BreezAudioRecognition`, or a subclass — and which methods are overridden? (`agent-service` was not on the research machine.)
 2. **Every other** LiveKit monkey-patch in agent-service. That, not EOU, decides how hard 1.6.x really is.

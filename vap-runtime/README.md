@@ -68,7 +68,7 @@ Live calls: feed 100 ms chunks (`1600` samples). **Do not `flush=True`** except 
 |---|---|
 | `breez_vap/load.py` | `VapGPT(VapConfig())` + checkpoint |
 | `breez_vap/streaming.py` | **Use this.** Overlap-save CPC + short transformer |
-| `breez_vap/naive.py` | Old rolling window (do not ship) |
+| `breez_vap/naive.py` | Rolling window (baseline; expensive) |
 | `breez_vap/policy.py` | Sticky vap-only mute + two-head mute |
 | `third_party/vap/` | KTH model, untouched |
 | `weights/*.pt` | English stereo checkpoint |
@@ -100,7 +100,7 @@ p_now, vad = stream.decode_last(window_frames=250)  # 5 s * 50 Hz
 
 `n` can be any size; leftover samples < 160 stay in the hop buffer.
 
-## Default parameters (ship these)
+## Default parameters
 
 | Name | Value | Why |
 |---|---|---|
@@ -149,6 +149,6 @@ RSS: ~120 MB on load, ~165 MB per naive stream. Streaming keeps a short feature 
 ## What this is not
 
 - Not quantized (tried; see `BEFORE_AFTER.md`).
-- Not ONNX (fp32 ONNX export was bit-exact and is a possible later ship format; int8 ONNX broke the model).
+- Not ONNX (fp32 ONNX export was bit-exact and is a possible later format; int8 ONNX broke the model).
 - Not an Arabic fine-tune.
 - Not a KV-cache transformer (wrong lever; CPC is 90% of the cost).

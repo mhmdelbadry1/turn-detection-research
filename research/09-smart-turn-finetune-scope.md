@@ -1,14 +1,14 @@
-# Smart Turn fine-tune — scope (2026-09-05)
+# Smart Turn retrain — scope (2026-09-05)
 
-Brief item 5: **estimate** data effort, GPU hours, expected gain. **Do not train.** We did not train. No GPU job, no prod audio, no 41 GB download.
+Question: data effort, GPU hours, expected gain on Arabic FC@300ms. **No training was run.** No GPU job, no production audio, no 41 GB download.
 
-Read from source: [pipecat-ai/smart-turn](https://github.com/pipecat-ai/smart-turn) `train.py`, `train_modal.py`, and the data-contribution guide (clone 2026-09-05).
+Source: [pipecat-ai/smart-turn](https://github.com/pipecat-ai/smart-turn) `train.py`, `train_modal.py`, and the data-contribution guide (clone 2026-09-05).
 
 ## Verdict (opinion)
 
-Fine-tune is the **second** ship, not the first. Unstub stock v3.2 now — it already beats NAMO on Arabic by ~25 pp. Fine-tune when a **Gulf train set** exists that is **disjoint** from the 300–500 eval turns.
+A retrain is a **second** step after using stock v3.2. Stock already beats NAMO on Arabic by ~25 pp. Domain adaptation waits on a **Gulf train set** that is **disjoint** from any 300–500-turn eval set.
 
-Do **not** use v1-mini scores as labels. Its Model License forbids training other models on its outputs.
+v1-mini scores cannot be used as labels. Its Model License forbids training other models on its outputs.
 
 ## What their training script actually is (fact)
 
@@ -38,13 +38,13 @@ Optimizer steps on the public set: `270,946 × 0.9 / 384 × 4 ≈ **2,540**`.
 | Same on a T4 16 GB | longer; batch 384 may OOM (community used 32 × grad-accum 12) |
 | Mix 2–5k Gulf clips into the public set, 4 epochs | **same ~3–12 h** — dataset size barely moves |
 | Continue 1 epoch, Gulf-only ~2k clips | **≪ 1 GPU-hour** — blocked on the missing checkpoint |
-| 400-clip overfit | minutes. **Do not.** |
+| 400-clip overfit | minutes. Not useful. |
 
 Wall clock is dominated by the 41 GB download and on-demand FLAC decode, not by the 8M-param forward. Their own 24 h Modal timeout is the tell.
 
 **Money is not the constraint.** An L4-hour is single-digit USD. **Labelling time is the cost.**
 
-## Data prep (opinion, effort after Omar's export)
+## Data prep (opinion, after an in-domain export exists)
 
 Format is fixed by the guide: mono **FLAC**, 16-bit, 16 kHz, **one speaker**, **≤ 16 s**, target **50:50** complete/incomplete, each clip ending in **~200 ms silence** (because ST only runs after VAD stop). Incomplete must end on a filler / connective / hanging prosody — **never mid-word**.
 
@@ -60,7 +60,7 @@ Same audio as the eval set, **different cut**:
 | Silence spans | shared with the eot-bench eval set |
 | Slice FLACs + JSONL metadata | ~1 engineer day |
 | Listen-QC ~20% + every Arabic filler edge case | ~1 day |
-| Legal / consent for **training** use (stricter than private eval) | **unknown — Omar** |
+| Legal / consent for **training** use (stricter than private eval) | **unknown — product/legal** |
 | **Total once export exists** | **~2–4 engineer days** + legal |
 
 Two hard rules: **300–500 turns is an eval set** (≈1k clips — tiny next to 271k), and Breez customer audio **stays private** — BSD-2 covers weights we train, not a right to publish callers on Pipecat's public HF.
@@ -73,7 +73,7 @@ No public number exists for "Arabic telephony fine-tune → Δ FC@300ms." Anyone
 
 Pipecat's own [v3.2 clip benchmark](https://huggingface.co/pipecat-ai/smart-turn-v3/blob/main/benchmarks/smart-turn-v3.2-gpu.md) (n=31,527): overall **93.71%**, English 94.71%, **Arabic 89.12%** (n=947, FPR 7.07%) — 4th-worst of 23 languages.
 
-**That 89% is not our 39.2%.** Theirs is isolated complete/incomplete clips; ours is streaming false-cutoff at a 300 ms budget. Do not put them in the same column.
+**That 89% is not the 39.2% FC@300ms.** Theirs is isolated complete/incomplete clips; this study’s number is streaming false-cutoff at a 300 ms budget. They are not the same metric.
 
 Arabic is ~3% of their **test** set. If train is similar, public Arabic is on the order of ~8k clips — **unverified**, we did not count the parquet.
 
@@ -87,9 +87,9 @@ On present evidence a fine-tune is **not** guaranteed to catch v1-mini (24.4%). 
 
 Success metric if we ever train: **FC@300ms on the held-out Gulf set** vs stock v3.2 on the same set. Not clip accuracy.
 
-## Recipe when it is scheduled (opinion, do not run now)
+## If a retrain is run later (opinion — not started)
 
-1. Unstub stock v3.2 on 1.4.5. Keep Krisp.
+1. Restore stock v3.2 on 1.4.5. Keep Krisp.
 2. Export **eval** (300–500) and a **larger disjoint train** split.
 3. Slice FLACs, 50:50, listen-QC.
 4. Either get Pipecat's v3.2 `Trainer` checkpoint, or retrain from `whisper-tiny` with `datasets_training = [public v3.2-train, private Gulf]`.

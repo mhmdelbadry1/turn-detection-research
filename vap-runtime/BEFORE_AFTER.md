@@ -1,6 +1,6 @@
 # VAP: before vs after optimization
 
-## Before (do not ship) — `breez_vap/naive.py`
+## Before — `breez_vap/naive.py`
 
 Every 100 ms we concatenated the new audio onto a rolling buffer of the last **N seconds** and ran the **entire** `VapGPT` forward: CPC convs + LSTM + downsample + both transformers + heads.
 
@@ -30,7 +30,7 @@ Just passing the last 1 s of **waveform** into the model does **not** match a 20
 
 The KTH IWSDS 2024 paper (Inoue et al.) does the correct split: **all audio through CPC**, transformers on ~1 s of features. Their 1 s result was **silence shift/hold** on a Japanese model (76.16% vs 74.20% at 20 s). It is not a claim about talk-over-TTS.
 
-## After (ship this) — `breez_vap/streaming.py`
+## After — `breez_vap/streaming.py`
 
 We implemented that split on this checkpoint. `EncoderCPC` in KTH’s repo has **no** streaming path, so the wrapper does it:
 

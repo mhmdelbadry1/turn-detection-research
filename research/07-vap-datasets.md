@@ -15,4 +15,4 @@ None of Switchboard / Fisher / Candor is the Breez product test (Gulf user vs **
 
 **Candor:** 1,656 English Zoom calls, ~850 h, 32 kHz stereo (one speaker per channel), ~48% of transitions overlap. CC BY-NC + application. VAP papers in 2025 do use it (audio-only S/H ~79% balanced acc vs ~65% on Switchboard in the same study). Closer to WebRTC; still two humans.
 
-**For us:** do not buy Fisher just to test. Switchboard only if we want a paper-comparable number. Candor if we want a public overlap stress test. The number that matters is still Breez `human.ogg` + `agent.ogg`.
+**Implication:** Fisher is extra English hours, not a required test set. Switchboard only if a paper-comparable number is needed. Candor if a public overlap stress test is needed. The in-domain measurement is still dual-track `human.ogg` + `agent.ogg`.

@@ -1,41 +1,40 @@
 # Turn detection research
 
-**Internal.** Contains a 51Talk caller recording. Do not publish.
+A note on **when a voice agent should start speaking**, and **when it should yield**. Measurements, listen clips, and a small runtime for the overlap head. Not a product ticket.
 
-Start here, then read **[RECOMMENDATION.md](RECOMMENDATION.md)**. Runnable overlap-head code: **[vap-runtime/](vap-runtime/)**. Listen clips by type: **[recordings/](recordings/)**.
+The listen set in `recordings/` is a real telephony call. Keep this repository private.
 
-This is the distilled report (tables, decision, clips, VAP runtime). The working notebook stays in the research workspace; it was not copied here.
+Start with **[FINDINGS.md](FINDINGS.md)** (the one-page conclusion). Code for the overlap head: **[vap-runtime/](vap-runtime/)**. Clips: **[recordings/](recordings/)**.
 
-| Read this | What it is |
+| Note | Contents |
 |---|---|
-| [research/00-status.md](research/00-status.md) | Original brief vs what is done. Gaps called out. |
-| [RECOMMENDATION.md](RECOMMENDATION.md) | **Ship this.** Pause head vs overlap head. |
-| [research/01-from-the-beginning.md](research/01-from-the-beginning.md) | Prod today (NAMO), what we ran, in order. |
-| [research/02-eot-bench-numbers.md](research/02-eot-bench-numbers.md) | Reproduced leaderboard + NAMO on the same harness. |
-| [research/08-vap-silent-ch1.md](research/08-vap-silent-ch1.md) | How VAP got 54.8% on eot-bench (silent agent channel). |
-| [research/05-cpu-cost.md](research/05-cpu-cost.md) | Pause-head p50/p95 and CPU% (Apple M5). |
+| [FINDINGS.md](FINDINGS.md) | Pause head vs overlap head. What the numbers support. |
+| [research/00-scope.md](research/00-scope.md) | Questions asked, what was measured, what is still open. |
+| [research/01-from-the-beginning.md](research/01-from-the-beginning.md) | Production baseline, then the experiments in order. |
+| [research/02-eot-bench-numbers.md](research/02-eot-bench-numbers.md) | Public eot-bench, plus NAMO on the same harness. |
+| [research/08-vap-silent-ch1.md](research/08-vap-silent-ch1.md) | Why silent-agent VAP matches a silence timer on eot-bench. |
+| [research/05-cpu-cost.md](research/05-cpu-cost.md) | Pause-head latency and CPU% (Apple M5). |
 | [research/03-architecture-two-heads.md](research/03-architecture-two-heads.md) | Two jobs, two clocks. Why score fusion failed. |
-| [research/04-vap-listen-on-one-call.md](research/04-vap-listen-on-one-call.md) | 51Talk A/B: what each clip folder is. |
-| [research/06-vap-benchmarks.md](research/06-vap-benchmarks.md) | The actual VAP protocol (S/H, S/L, S-pred, BC-pred). Not eot-bench. |
-| [research/07-vap-datasets.md](research/07-vap-datasets.md) | Switchboard vs Fisher vs Candor — which to test on. |
-| [research/09-smart-turn-finetune-scope.md](research/09-smart-turn-finetune-scope.md) | Brief item 5. Data effort, GPU hours, expected gain. Not trained. |
-| [research/10-livekit-1.6-upgrade-scope.md](research/10-livekit-1.6-upgrade-scope.md) | Brief item 6. What breaks on 1.6.x, and how v1-mini becomes real. |
-| [vap-runtime/README.md](vap-runtime/README.md) | How VAP works, defaults, how to run. |
+| [research/04-vap-listen-on-one-call.md](research/04-vap-listen-on-one-call.md) | One 51Talk call: what each clip folder is. |
+| [research/06-vap-benchmarks.md](research/06-vap-benchmarks.md) | VAP’s own protocol (S/H, S/L, S-pred, BC-pred). Not eot-bench. |
+| [research/07-vap-datasets.md](research/07-vap-datasets.md) | Switchboard vs Fisher vs Candor. |
+| [research/09-smart-turn-finetune-scope.md](research/09-smart-turn-finetune-scope.md) | What a Smart Turn retrain would cost. Not trained. |
+| [research/10-livekit-1.6-upgrade-scope.md](research/10-livekit-1.6-upgrade-scope.md) | What 1.4.5 → 1.6.x does to `AudioRecognition`, and how v1-mini becomes available. |
+| [vap-runtime/README.md](vap-runtime/README.md) | Streaming VAP: defaults and how to run. |
 | [vap-runtime/BEFORE_AFTER.md](vap-runtime/BEFORE_AFTER.md) | Naive rolling window vs streaming CPC. |
-| [recordings/README.md](recordings/README.md) | How to listen. One folder per mix type. |
+| [recordings/README.md](recordings/README.md) | How to listen. One folder per mix. |
 
-## Open on the product side
+## What is still open
 
-1. **Unstub Smart Turn** in agent-service (replace NAMO for pause-EOT). CPU is not a reason to keep NAMO.
-2. **Export 300–500 Gulf turns** (eval). Fine-tune is **scoped** — still do not train until a **disjoint** train slice exists.
-3. Decide whether **LiveKit Agents 1.6.x** is acceptable (v1-mini path = drop the `AudioRecognition` fork).
-4. **VAP is later**, behind a flag. Runtime is ready to try. English checkpoint, n=1 Gulf call.
+1. A held-out Gulf/Levantine eval set (hundreds of real turns). Public eot-bench Arabic is not this traffic.
+2. Whether LiveKit Agents 1.6.x is worth taking for v1-mini — that path means dropping the `AudioRecognition` fork, not re-porting it.
+3. VAP as an overlap head, behind a flag, after it is compared to a duration heuristic. English checkpoint, n=1 Gulf call so far.
 
 ## Layout
 
 ```
 turn-detection-research/
-  RECOMMENDATION.md
+  FINDINGS.md
   research/
   recordings/
     00-source-tracks/              human.ogg + agent.ogg (VAP input)
@@ -46,5 +45,5 @@ turn-detection-research/
     05-streaming-1s/               weaker overlap
     06-streaming-5s-recommended/   default
     07-streaming-20s/              misses 10 Hz
-  vap-runtime/                     ready to use
+  vap-runtime/
 ```

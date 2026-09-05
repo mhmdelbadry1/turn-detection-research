@@ -20,6 +20,7 @@ Start with **[RECOMMENDATION.md](RECOMMENDATION.md)** (one page: model, threshol
 | [research/07-vap-datasets.md](research/07-vap-datasets.md) | Switchboard vs Fisher vs Candor. |
 | [research/09-smart-turn-finetune-scope.md](research/09-smart-turn-finetune-scope.md) | What a Smart Turn retrain would cost. Not trained. |
 | [research/10-livekit-1.6-upgrade-scope.md](research/10-livekit-1.6-upgrade-scope.md) | What 1.4.5 → 1.6.x does to `AudioRecognition`, and how v1-mini becomes available. |
+| [research/11-vap-finetune-data.md](research/11-vap-finetune-data.md) | What a VAP fine-tune would need: hours, VAD labels, multilingual mix. Not trained. |
 | [vap-runtime/README.md](vap-runtime/README.md) | Streaming VAP: defaults and how to run. |
 | [vap-runtime/BEFORE_AFTER.md](vap-runtime/BEFORE_AFTER.md) | Naive rolling window vs streaming CPC. |
 | [recordings/README.md](recordings/README.md) | How to listen. One folder per mix. |

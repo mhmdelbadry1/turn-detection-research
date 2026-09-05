@@ -74,6 +74,8 @@ Voice Activity Projection (Ekstedt & Skantze, KTH). Stereo: ch0 = user, ch1 = ag
 
 **Retraining Smart Turn.** Upstream `train.py` is a **full retrain from `openai/whisper-tiny`** (4 epochs, batch 384, 270,946 public clips ≈ 2,540 steps), not a continue-from-v3.2 job — Pipecat publishes ONNX only. Bound **~3–12 L4-hours** (unverified) plus **~2–4 days** of slicing and listen-QC. Expected Arabic FC@300ms change is a **hypothesis** (0–10 pp), not guaranteed to catch v1-mini. [research/09-smart-turn-finetune-scope.md](research/09-smart-turn-finetune-scope.md).
 
+**Fine-tuning VAP** (overlap head, not a pause replacement). Freeze CPC; train transformers on **per-channel VAD**, not complete/incomplete. Multilingual means mix hours in one run — an English checkpoint does not transfer. Grain is **hours of stereo sessions**, not 300–500 pause clips. [research/11-vap-finetune-data.md](research/11-vap-finetune-data.md).
+
 ## Open
 
 1. Held-out Gulf/Levantine turns (hundreds). This is the measurement that could change the ranking.

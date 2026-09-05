@@ -19,6 +19,7 @@ Work **outside** that list, included because the 51Talk call’s problem is over
 - Last-token text gates on lagged STT: **negative** (same structural issue as NAMO).
 - Score-fusion of VAP + Smart Turn on pause-EOT: **negative** for Arabic.
 - VAP as overlap head, CPU, quantization (rejected), streaming CPC, 5 s window: `vap-runtime/` and [03-architecture-two-heads.md](03-architecture-two-heads.md).
+- What a VAP fine-tune would need (hours of stereo + per-channel VAD, not 300–500 pause clips): [11-vap-finetune-data.md](11-vap-finetune-data.md). **Not trained.**
 
 ## Still open
 

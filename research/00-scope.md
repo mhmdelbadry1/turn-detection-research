@@ -7,12 +7,12 @@ Every number in this folder was measured or read from a cited source. Unpublishe
 | # | Question | Status | Where |
 |---|---|---|---|
 | 1 | Reproduce public eot-bench (Smart Turn + v1-mini, Arabic + English) | Done — exact match to published FC@300ms | [02-eot-bench-numbers.md](02-eot-bench-numbers.md) |
-| 2 | NAMO on the same harness | Done — first public-harness number; worse than VAD | same + [FINDINGS.md](../FINDINGS.md) |
+| 2 | NAMO on the same harness | Done — first public-harness number; worse than VAD | same + [RECOMMENDATION.md](../RECOMMENDATION.md) |
 | 3 | Pause-head CPU (p50/p95, CPU% at ~15 pauses/min, machine spec) | Done on Apple M5, not production Linux | [05-cpu-cost.md](05-cpu-cost.md) |
 | 4 | In-domain Arabic set, 300–500 turns, all three models | **Open** — needs a call-recording export. Not pulled from production here | n=1 51Talk listen: [04-vap-listen-on-one-call.md](04-vap-listen-on-one-call.md) |
 | 5 | What would a Smart Turn retrain cost (data, GPU hours, expected gain)? | Scoped 2026-09-05. **Not trained** | [09-smart-turn-finetune-scope.md](09-smart-turn-finetune-scope.md) |
 | 6 | What breaks on livekit-agents 1.4.5 → 1.6.x with a forked `AudioRecognition`? | Scoped 2026-09-05. Upgrade not started. Breez fork file was not on this machine | [10-livekit-1.6-upgrade-scope.md](10-livekit-1.6-upgrade-scope.md) |
-| 7 | One-page conclusion: model, thresholds, FC/latency, CPU, risks | [FINDINGS.md](../FINDINGS.md) — final on what was measurable; interim on in-domain Arabic until (4) exists | |
+| 7 | One-page recommendation: model, thresholds, FC/latency, CPU, risks | [RECOMMENDATION.md](../RECOMMENDATION.md) — final on what was measurable; interim on in-domain Arabic until (4) exists | |
 
 Work **outside** that list, included because the 51Talk call’s problem is overlap, which eot-bench cannot score:
 

@@ -4,11 +4,11 @@ A note on **when a voice agent should start speaking**, and **when it should yie
 
 The listen set in `recordings/` is a real telephony call. Keep this repository private.
 
-Start with **[FINDINGS.md](FINDINGS.md)** (the one-page conclusion). Code for the overlap head: **[vap-runtime/](vap-runtime/)**. Clips: **[recordings/](recordings/)**.
+Start with **[RECOMMENDATION.md](RECOMMENDATION.md)** (one page: model, thresholds, CPU, open questions). Code for the overlap head: **[vap-runtime/](vap-runtime/)**. Clips: **[recordings/](recordings/)**.
 
 | Note | Contents |
 |---|---|
-| [FINDINGS.md](FINDINGS.md) | Pause head vs overlap head. What the numbers support. |
+| [RECOMMENDATION.md](RECOMMENDATION.md) | Pause head vs overlap head. What the numbers support. |
 | [research/00-scope.md](research/00-scope.md) | Questions asked, what was measured, what is still open. |
 | [research/01-from-the-beginning.md](research/01-from-the-beginning.md) | Production baseline, then the experiments in order. |
 | [research/02-eot-bench-numbers.md](research/02-eot-bench-numbers.md) | Public eot-bench, plus NAMO on the same harness. |
@@ -34,7 +34,7 @@ Start with **[FINDINGS.md](FINDINGS.md)** (the one-page conclusion). Code for th
 
 ```
 turn-detection-research/
-  FINDINGS.md
+  RECOMMENDATION.md
   research/
   recordings/
     00-source-tracks/              human.ogg + agent.ogg (VAP input)

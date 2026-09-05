@@ -14,7 +14,7 @@ Diffed upstream `github.com/livekit/agents` at `livekit-agents@1.4.5` (reported 
 | **B. Re-port the fork** | Replay NAMO / proportional / ST override onto the new class | **L** on top of the bump | No — still a text detector |
 | **C. Stay on 1.4.5** | Unstub Smart Turn only | **S** | No |
 
-Path C is the pause-head finding in [FINDINGS.md](../FINDINGS.md). This note exists so Path A is a known cost, not an unknown.
+Path C is the pause-head finding in [RECOMMENDATION.md](../RECOMMENDATION.md). This note exists so Path A is a known cost, not an unknown.
 
 ## Scale of the change (fact)
 
